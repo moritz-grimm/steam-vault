@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { getDirname } from "./filepath-utils";
-import { toError } from "./error-utils";
+import { getDirname } from "./utils/filepath-utils";
+import { toError } from "./utils/error-utils";
 
 // TODO: Relocate config to appDate or somewhere similar
 const jsonConfigPath = path.resolve(getDirname(), "../../steamvault-config.json");

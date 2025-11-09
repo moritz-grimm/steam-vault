@@ -5,11 +5,13 @@ import { input } from "@inquirer/prompts";
 import { isValidDirectory } from "src/utils/filepath-utils";
 import path from "node:path";
 
+// TODO: Refactor from inquirer to inquirer/prompts
+
 export async function printMainMenu(): Promise<void> {
     let running = true;
 
     while (running) {
-        console.clear();
+        // console.clear();
         const answer = await inquirer.prompt<MainMenuAnswer>([
             {
                 name: "mainMenu",
@@ -27,7 +29,7 @@ export async function printMainMenu(): Promise<void> {
                 await handleSettings();
                 break;
             case "Exit":
-                console.clear();
+                // console.clear();
                 console.log("Exiting program");
                 running = false;
                 break;
@@ -39,7 +41,7 @@ export async function printSettings(): Promise<void> {
     let running = true;
 
     while (running) {
-        console.clear();
+        // console.clear();
         const answer = await inquirer.prompt<SettingsMenuAnswer>([
             {
                 name: "settingsMenu",

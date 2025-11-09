@@ -7,3 +7,5 @@ npm-debug.log
 
 # steam-vault
 steamvault-config.json
+steamvault-cache.json
+/logs

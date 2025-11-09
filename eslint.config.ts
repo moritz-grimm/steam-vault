@@ -63,7 +63,12 @@ export default [
             'stylistic/comma-dangle': ['warn', 'always-multiline'],
             'stylistic/object-curly-spacing': ['warn', 'always'],
             'stylistic/keyword-spacing': ['warn', { before: true, after: true }],
-            'stylistic/space-before-function-paren': ['warn', 'never'],
+            'stylistic/space-before-function-paren': ['warn', {
+                "anonymous": "never",
+                "named": "never",
+                "asyncArrow": "never",
+                "catch": "always"
+            }],
             'stylistic/no-trailing-spaces': 'warn',
             'stylistic/eol-last': ['warn', 'always'],
             'stylistic/no-multi-spaces': 'warn',
