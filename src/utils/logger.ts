@@ -2,8 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { createLogger, format, transports } from "winston";
 
-// TODO: Replace console.log with logger.log everywhere
-
 const logDir = "logs";
 if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir);

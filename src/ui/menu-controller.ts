@@ -1,9 +1,17 @@
 import { writeToJsonConfig } from "src/config-service";
 import { NotImplementedException } from "src/errors/not-implemented-exception";
-import { printDirectoryPathPrompt, printSettings } from "./menu-renderer";
+import { printDirectoryPathPrompt, printPartialOrFullBackupPrompt, printSettings } from "./menu-renderer";
+import { doFullBackup, doPartialBackup } from "src/backup-service";
 
 export async function handleBackup(): Promise<void> {
-    throw new NotImplementedException;
+    const userChoice = await printPartialOrFullBackupPrompt();
+    // TODO: Backup everything or just a specific folder
+
+    if (userChoice === "full") {
+        await doFullBackup();
+    } else if (userChoice === "partial") {
+        await doPartialBackup();
+    }
 }
 
 export async function handleSettings(): Promise<void> {

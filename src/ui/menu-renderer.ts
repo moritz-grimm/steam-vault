@@ -1,9 +1,10 @@
+import { input, select } from "@inquirer/prompts";
 import inquirer from "inquirer";
-import { MainMenuAnswer, SettingsMenuAnswer } from "./menu-types";
-import { handleBackup, handleDirectoryPathInput, handleSettings } from "./menu-controller";
-import { input } from "@inquirer/prompts";
-import { isValidDirectory } from "src/utils/filepath-utils";
 import path from "node:path";
+import { isValidDirectory } from "src/utils/filepath-utils";
+import { cliConfig } from './../steamvault';
+import { handleBackup, handleDirectoryPathInput, handleSettings } from "./menu-controller";
+import { MainMenuAnswer, SettingsMenuAnswer } from "./menu-types";
 
 // TODO: Refactor from inquirer to inquirer/prompts
 
@@ -11,7 +12,7 @@ export async function printMainMenu(): Promise<void> {
     let running = true;
 
     while (running) {
-        // console.clear();
+        if (!cliConfig.debug) console.clear();
         const answer = await inquirer.prompt<MainMenuAnswer>([
             {
                 name: "mainMenu",
@@ -29,7 +30,7 @@ export async function printMainMenu(): Promise<void> {
                 await handleSettings();
                 break;
             case "Exit":
-                // console.clear();
+                if (!cliConfig.debug) console.clear();
                 console.log("Exiting program");
                 running = false;
                 break;
@@ -41,7 +42,7 @@ export async function printSettings(): Promise<void> {
     let running = true;
 
     while (running) {
-        // console.clear();
+        if (!cliConfig.debug) console.clear();
         const answer = await inquirer.prompt<SettingsMenuAnswer>([
             {
                 name: "settingsMenu",
@@ -76,4 +77,28 @@ export async function printDirectoryPathPrompt(): Promise<string> {
     });
 
     return path.resolve(userInput);
+}
+
+export async function printPartialOrFullBackupPrompt(): Promise<string> {
+    if (!cliConfig.debug) console.clear();
+    return await select({
+        message: "Choose between full or partial backup",
+        choices: [
+            {
+                name: "Full",
+                value: "full",
+                description: "Backup every screenshot folder",
+            },
+            {
+                name: "Partial",
+                value: "partial",
+                description: "Choose a folder you want to backup",
+            },
+            {
+                name: "Return",
+                value: "return",
+                description: "Return to the main menu",
+            },
+        ],
+    });
 }

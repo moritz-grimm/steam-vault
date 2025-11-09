@@ -3,7 +3,7 @@ import path from "node:path";
 import { getDirname } from "./utils/filepath-utils";
 import { toError } from "./utils/error-utils";
 
-// TODO: Relocate config to appDate or somewhere similar
+// TODO: Relocate config to appData or somewhere similar
 const jsonConfigPath = path.resolve(getDirname(), "../../steamvault-config.json");
 
 type JsonConfig = {
@@ -21,7 +21,6 @@ type JsonConfig = {
  * @returns {Promise<JsonConfig>} Parsed configuration object.
  */
 export async function loadJsonConfig(): Promise<JsonConfig> {
-    // TODO: This can fail if its the first app start. Add a jsonConfig init
     try {
         const data = await fs.readFile(jsonConfigPath, "utf-8");
         return JSON.parse(data) as JsonConfig;
