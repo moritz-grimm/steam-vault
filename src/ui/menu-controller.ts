@@ -1,5 +1,4 @@
 import { writeToJsonConfig } from "src/config-service";
-import { NotImplementedException } from "src/errors/not-implemented-exception";
 import { printDirectoryPathPrompt, printPartialOrFullBackupPrompt, printSettings } from "./menu-renderer";
 import { doFullBackup, doPartialBackup } from "src/backup-service";
 

@@ -21,3 +21,9 @@ export async function getGameTitle(appId: string): Promise<string | undefined> {
         return undefined;
     }
 }
+
+export async function uploadToCloud(gameTitle: string): Promise<void> {
+    logger.log("info", "Simulating upload");
+    logger.log("info", "Uploading " + gameTitle);
+    return new Promise(resolve => setTimeout(resolve, 500));
+}

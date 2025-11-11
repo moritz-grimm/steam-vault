@@ -2,12 +2,20 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { getDirname } from "./utils/filepath-utils";
 import { toError } from "./utils/error-utils";
+import { CliOptions, parseCLIArgs } from "src/cli/cli-parser";
 
 // TODO: Relocate config to appData or somewhere similar
 const jsonConfigPath = path.resolve(getDirname(), "../../steamvault-config.json");
 
+let configCache: Config | null = null;
+
 type JsonConfig = {
     folderpath: string
+};
+
+type Config = {
+    json: JsonConfig;
+    cli: CliOptions;
 };
 
 /**
@@ -37,8 +45,34 @@ export async function writeToJsonConfig(jsonKey: keyof JsonConfig, newValue: str
         fileData[jsonKey] = newValue;
 
         await fs.writeFile(jsonConfigPath, JSON.stringify(fileData, null, 2), "utf-8");
+        await loadConfigs();
     } catch (err: unknown) {
         const error = toError(err);
         throw new Error("Could not write to steamvault-config.json", error);
     }
+}
+
+/**
+ * Load the cli and json configs into cache. This needs to be called on start and everytime something changes on runtime to ensure correct data
+ */
+export async function loadConfigs(): Promise<void> {
+    configCache = {
+        json: await loadJsonConfig(),
+        cli: parseCLIArgs(),
+    };
+}
+
+export function getConfig(): Config {
+    if (!configCache) {
+        throw new Error("Config not loaded! Call loadConfig() first.");
+    }
+    return configCache;
+}
+
+export function getJsonConfig(): JsonConfig {
+    return getConfig().json;
+}
+
+export function getCliConfig(): CliOptions {
+    return getConfig().cli;
 }

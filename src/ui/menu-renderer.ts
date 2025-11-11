@@ -1,10 +1,8 @@
 import { input, select } from "@inquirer/prompts";
-import inquirer from "inquirer";
 import path from "node:path";
 import { isValidDirectory } from "src/utils/filepath-utils";
-import { cliConfig } from './../steamvault';
 import { handleBackup, handleDirectoryPathInput, handleSettings } from "./menu-controller";
-import { MainMenuAnswer, SettingsMenuAnswer } from "./menu-types";
+import { getCliConfig, getJsonConfig } from "src/config-service";
 
 // TODO: Refactor from inquirer to inquirer/prompts
 
@@ -12,25 +10,38 @@ export async function printMainMenu(): Promise<void> {
     let running = true;
 
     while (running) {
-        if (!cliConfig.debug) console.clear();
-        const answer = await inquirer.prompt<MainMenuAnswer>([
-            {
-                name: "mainMenu",
-                message: "Choose a option",
-                type: "list",
-                choices: ["Run Backup", "Settings", "Exit"],
-            },
-        ]);
+        if (!getCliConfig().debug) console.clear();
 
-        switch (answer.mainMenu) {
-            case "Run Backup":
+        const answer = await select({
+            message: "Choose an option",
+            choices: [
+                {
+                    name: "Run Backup",
+                    value: "run backup",
+                    description: "Start the backup with the currently configured folderpath",
+                },
+                {
+                    name: "Settings",
+                    value: "settings",
+                    description: "Open settings",
+                },
+                {
+                    name: "Exit",
+                    value: "exit",
+                    description: "Exit SteamVault",
+                },
+            ],
+        });
+
+        switch (answer) {
+            case "run backup":
                 await handleBackup();
                 break;
-            case "Settings":
+            case "settings":
                 await handleSettings();
                 break;
-            case "Exit":
-                if (!cliConfig.debug) console.clear();
+            case "exit":
+                if (!getCliConfig().debug) console.clear();
                 console.log("Exiting program");
                 running = false;
                 break;
@@ -42,21 +53,30 @@ export async function printSettings(): Promise<void> {
     let running = true;
 
     while (running) {
-        if (!cliConfig.debug) console.clear();
-        const answer = await inquirer.prompt<SettingsMenuAnswer>([
-            {
-                name: "settingsMenu",
-                message: "Choose a setting",
-                type: "list",
-                choices: ["Folderpath", "Return"],
-            },
-        ]);
+        if (!getCliConfig().debug) console.clear();
 
-        switch (answer.settingsMenu) {
-            case "Folderpath":
+        const answer = await select({
+            message: "Choose a setting",
+            choices: [
+                {
+                    name: "Folderpath",
+                    value: "folderpath",
+                    description: `Current folderpath: '${getJsonConfig().folderpath}'`,
+                },
+                {
+                    name: "Return",
+                    value: "return",
+                    description: "Return to the main menu",
+                },
+
+            ],
+        });
+
+        switch (answer) {
+            case "folderpath":
                 await handleDirectoryPathInput();
                 break;
-            case "Return":
+            case "return":
                 running = false;
                 break;
         };
@@ -80,7 +100,7 @@ export async function printDirectoryPathPrompt(): Promise<string> {
 }
 
 export async function printPartialOrFullBackupPrompt(): Promise<string> {
-    if (!cliConfig.debug) console.clear();
+    if (!getCliConfig().debug) console.clear();
     return await select({
         message: "Choose between full or partial backup",
         choices: [
@@ -92,7 +112,7 @@ export async function printPartialOrFullBackupPrompt(): Promise<string> {
             {
                 name: "Partial",
                 value: "partial",
-                description: "Choose a folder you want to backup",
+                description: "Choose a specific folder you want to backup",
             },
             {
                 name: "Return",

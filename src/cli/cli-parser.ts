@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { logger } from "src/utils/logger";
 
-type CliOptions = {
+export type CliOptions = {
     debug: boolean;
 }
 
