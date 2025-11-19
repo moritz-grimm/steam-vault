@@ -12,6 +12,8 @@
   },
   "scripts": {
     "dev": "npx tsx ./src/steamvault.ts --debug",
+    "dotenvx:decrypt": "npx dotenvx decrypt",
+    "dotenvx:encrypt": "npx dotenvx encrypt",
     "lint": "npx eslint",
     "lint:fix": "npx eslint --fix",
     "prod": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts",
@@ -19,6 +21,7 @@
     "sort-package-json": "npx sort-package-json"
   },
   "dependencies": {
+    "@dotenvx/dotenvx": "^1.51.1",
     "@inquirer/prompts": "^7.9.0",
     "axios": "^1.13.2",
     "commander": "^14.0.2",

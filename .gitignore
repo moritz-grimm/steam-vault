@@ -2,10 +2,15 @@
 node_modules
 build
 npm-debug.log
-.env
+**/.env
 .DS_Store
 
 # steam-vault
 steamvault-config.json
 steamvault-cache.json
 /logs
+
+# dotenvx
+!/.env
+.env.keys
+
