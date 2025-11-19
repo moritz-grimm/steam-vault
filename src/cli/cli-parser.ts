@@ -3,7 +3,7 @@ import { logger } from "src/utils/logger";
 
 export type CliOptions = {
     debug: boolean;
-}
+};
 
 export function parseCLIArgs(): CliOptions {
     const program = new Command();

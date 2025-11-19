@@ -5,7 +5,7 @@ import { scanForScreenshotFolders } from "src/folder-scanner-service";
 import { logger } from "src/utils/logger";
 
 /**
- * 
+ *
  */
 export async function doFullBackup(): Promise<void> {
     const gameIds = await scanForScreenshotFolders(getJsonConfig().folderpath);
@@ -15,7 +15,7 @@ export async function doFullBackup(): Promise<void> {
     );
 
     for (const result of results) {
-        if (result.status === 'fulfilled') {
+        if (result.status === "fulfilled") {
             await uploadToCloud(result.value);
         } else {
             logger.log("error", "Failed: " + result.reason);

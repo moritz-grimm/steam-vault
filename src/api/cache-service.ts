@@ -1,4 +1,4 @@
-import fs from 'node:fs/promises';
+import fs from "node:fs/promises";
 import path from "node:path";
 import { toError } from "src/utils/error-utils";
 import { getDirname } from "src/utils/filepath-utils";

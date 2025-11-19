@@ -1,39 +1,40 @@
 {
-  "name": "steam-vault",
-  "version": "1.0.0",
-  "description": "",
-  "keywords": [],
-  "license": "MIT",
-  "author": "moritz-grimm",
-  "type": "module",
-  "main": "steamvault.ts",
-  "bin": {
-    "steamvault": "./src/steamvault.ts"
-  },
-  "scripts": {
-    "dev": "npx tsx ./src/steamvault.ts --debug",
-    "dotenvx:decrypt": "npx dotenvx decrypt",
-    "dotenvx:encrypt": "npx dotenvx encrypt",
-    "lint": "npx eslint",
-    "lint:fix": "npx eslint --fix",
-    "prod": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts",
-    "prod:debug": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts --debug",
-    "sort-package-json": "npx sort-package-json"
-  },
-  "dependencies": {
-    "@dotenvx/dotenvx": "^1.51.1",
-    "@inquirer/prompts": "^7.9.0",
-    "axios": "^1.13.2",
-    "commander": "^14.0.2",
-    "winston": "^3.18.3"
-  },
-  "devDependencies": {
-    "@moritz-grimm/eslint-config-moritz-grimm": "^1.0.1",
-    "@types/node": "^24.10.0",
-    "cross-env": "^10.1.0",
-    "eslint": "^9.39.1",
-    "globals": "^16.4.0",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
-  }
+    "name": "steam-vault",
+    "version": "1.0.0",
+    "description": "",
+    "keywords": [],
+    "license": "MIT",
+    "author": "moritz-grimm",
+    "type": "module",
+    "main": "steamvault.ts",
+    "bin": {
+        "steamvault": "./src/steamvault.ts"
+    },
+    "scripts": {
+        "dev": "npx tsx ./src/steamvault.ts --debug",
+        "dotenvx:decrypt": "npx dotenvx decrypt",
+        "dotenvx:encrypt": "npx dotenvx encrypt",
+        "lint": "npx eslint",
+        "lint:fix": "npx eslint --fix",
+        "prod": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts",
+        "prod:debug": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts --debug",
+        "sort-package-json": "npx sort-package-json"
+    },
+    "dependencies": {
+        "@azure/msal-node": "^3.8.2",
+        "@dotenvx/dotenvx": "^1.51.1",
+        "@inquirer/prompts": "^7.9.0",
+        "axios": "^1.13.2",
+        "commander": "^14.0.2",
+        "winston": "^3.18.3"
+    },
+    "devDependencies": {
+        "@moritz-grimm/eslint-config-moritz-grimm": "^1.0.1",
+        "@types/node": "^24.10.0",
+        "cross-env": "^10.1.0",
+        "eslint": "^9.39.1",
+        "globals": "^16.4.0",
+        "tsx": "^4.20.6",
+        "typescript": "^5.9.3"
+    }
 }
