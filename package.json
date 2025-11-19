@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "npx tsx ./src/steamvault.ts --debug",
+    "lint": "npx eslint",
+    "lint:fix": "npx eslint --fix",
     "prod": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts",
     "prod:debug": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts --debug",
     "lint": "npx eslint",
@@ -21,15 +23,12 @@
     "winston": "^3.18.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.37.0",
-    "@stylistic/eslint-plugin": "5.4.0",
+    "@moritz-grimm/eslint-config-moritz-grimm": "^1.0.1",
     "@types/node": "^24.10.0",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "globals": "^16.4.0",
-    "jiti": "^2.6.1",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.1"
+    "typescript": "^5.9.3"
   }
 }
