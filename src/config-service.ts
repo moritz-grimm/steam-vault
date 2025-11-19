@@ -38,6 +38,11 @@ export async function loadJsonConfig(): Promise<JsonConfig> {
     }
 }
 
+/**
+ * Write to the JSON configuration
+ * @param jsonKey The key to be replaced or created
+ * @param newValue The value of the previous given key
+ */
 export async function writeToJsonConfig(jsonKey: keyof JsonConfig, newValue: string): Promise<void> {
     try {
         const fileData = await loadJsonConfig();
