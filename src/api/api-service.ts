@@ -1,6 +1,6 @@
 import axios from "axios";
 import { toError } from "../utils/error-utils";
-import { cacheContainsKey, getGameTitleFromCache, writeToCache } from "src/api/cache-service";
+import { cacheContainsKey, getGameTitleFromCache, writeToCache } from "src/api/api-cache-service";
 import { logger } from "src/utils/logger";
 
 export async function getGameTitle(appId: string): Promise<string | undefined> {
