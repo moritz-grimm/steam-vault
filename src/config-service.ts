@@ -5,33 +5,39 @@ import { toError } from "./utils/error-utils";
 import { CliOptions, parseCLIArgs } from "src/cli/cli-parser";
 
 // TODO: Relocate config to appData or somewhere similar
-const jsonConfigPath = path.resolve(getDirname(), "../../steamvault-config.json");
+const settingsConfigPath = path.resolve(getDirname(), "../../steamvault-config.json");
+const authConfigPath = path.resolve(getDirname(), "../../auth-config.json");
 
 let configCache: Config | null = null;
 
-type JsonConfig = {
+type SettingsConfig = {
     folderpath: string
 };
 
+type AuthConfig = {
+    entraClientId: string
+};
+
 type Config = {
-    json: JsonConfig;
+    settings: SettingsConfig;
     cli: CliOptions;
+    auth: AuthConfig,
 };
 
 /**
- * Load application JSON configuration from disk.
+ * Load application settings configuration from disk.
  *
- * Reads the file at `steamvault-config.json` (atp relative to this module. In the future it should point to a config stored somewhere in appdata),
- * parses it as JSON and returns a typed JsonConfig object.
+ * Reads the file at `steamvault-config.json`,
+ * parses it as JSON and returns a typed SettingsConfig object.
  *
  * @throws An error if the file cannot be read or the JSON is invalid.
  *
- * @returns {Promise<JsonConfig>} Parsed configuration object.
+ * @returns {Promise<SettingsConfig>} Parsed configuration object.
  */
-export async function loadJsonConfig(): Promise<JsonConfig> {
+export async function loadSettingsConfig(): Promise<SettingsConfig> {
     try {
-        const data = await fs.readFile(jsonConfigPath, "utf-8");
-        return JSON.parse(data) as JsonConfig;
+        const data = await fs.readFile(settingsConfigPath, "utf-8");
+        return JSON.parse(data) as SettingsConfig;
     } catch (err: unknown) {
         const error = toError(err);
         throw new Error("Could not load steamvault-config.json", error);
@@ -39,17 +45,17 @@ export async function loadJsonConfig(): Promise<JsonConfig> {
 }
 
 /**
- * Write to the JSON configuration
+ * Write to the settings configuration
  * @param jsonKey The key to be replaced or created
  * @param newValue The value of the previous given key
  */
-export async function writeToJsonConfig(jsonKey: keyof JsonConfig, newValue: string): Promise<void> {
+export async function writeToSettingsConfig(jsonKey: keyof SettingsConfig, newValue: string): Promise<void> {
     try {
-        const fileData = await loadJsonConfig();
+        const fileData = await loadSettingsConfig();
 
         fileData[jsonKey] = newValue;
 
-        await fs.writeFile(jsonConfigPath, JSON.stringify(fileData, null, 2), "utf-8");
+        await fs.writeFile(settingsConfigPath, JSON.stringify(fileData, null, 2), "utf-8");
         await loadConfigs();
     } catch (err: unknown) {
         const error = toError(err);
@@ -58,12 +64,33 @@ export async function writeToJsonConfig(jsonKey: keyof JsonConfig, newValue: str
 }
 
 /**
+ * Reads the auth config from disk
+ *
+ * Reads the file at `auth-config.json`,
+ * parses it as JSON and returns a typed JsonConfig object.
+ *
+ * @throws An error if the file cannot be read or the JSON is invalid.
+ *
+ * @returns {Promise<AuthConfig>} Parsed configuration object.
+ */
+export async function loadAuthConfig(): Promise<AuthConfig> {
+    try {
+        const data = await fs.readFile(authConfigPath, "utf-8");
+        return JSON.parse(data) as AuthConfig;
+    } catch (err: unknown) {
+        const error = toError(err);
+        throw new Error("Could not load auth-config.sjon", error);
+    }
+}
+
+/**
  * Load the cli and json configs into cache. This needs to be called on start and everytime something changes on runtime to ensure correct data
  */
 export async function loadConfigs(): Promise<void> {
     configCache = {
-        json: await loadJsonConfig(),
+        settings: await loadSettingsConfig(),
         cli: parseCLIArgs(),
+        auth: await loadAuthConfig(),
     };
 }
 
@@ -74,10 +101,14 @@ export function getConfig(): Config {
     return configCache;
 }
 
-export function getJsonConfig(): JsonConfig {
-    return getConfig().json;
+export function getSettingsConfig(): SettingsConfig {
+    return getConfig().settings;
 }
 
 export function getCliConfig(): CliOptions {
     return getConfig().cli;
+}
+
+export function getAuthConfig(): AuthConfig {
+    return getConfig().auth;
 }

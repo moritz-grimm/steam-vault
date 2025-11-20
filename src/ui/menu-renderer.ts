@@ -2,7 +2,9 @@ import { input, select } from "@inquirer/prompts";
 import path from "node:path";
 import { isValidDirectory } from "src/utils/filepath-utils";
 import { handleBackup, handleDirectoryPathInput, handleSettings } from "./menu-controller";
-import { getCliConfig, getJsonConfig } from "src/config-service";
+import { getCliConfig, getSettingsConfig } from "src/config-service";
+import { loginToMicrosoft } from "src/auth/ms-auth";
+import { NotImplementedException } from "src/errors/not-implemented-exception";
 
 // TODO: Refactor from inquirer to inquirer/prompts
 
@@ -61,7 +63,12 @@ export async function printSettings(): Promise<void> {
                 {
                     name: "Folderpath",
                     value: "folderpath",
-                    description: `Current folderpath: '${getJsonConfig().folderpath}'`,
+                    description: `Current folderpath: '${getSettingsConfig().folderpath}'`,
+                },
+                {
+                    name: "Auth Setting",
+                    value: "authSettings",
+                    description: "Login/Logout for your Microsoft Account",
                 },
                 {
                     name: "Return",
@@ -76,12 +83,51 @@ export async function printSettings(): Promise<void> {
             case "folderpath":
                 await handleDirectoryPathInput();
                 break;
+            case "authSettings":
+                await printAuthSettings();
+                break;
             case "return":
                 running = false;
                 break;
         };
     }
 };
+
+export async function printAuthSettings(): Promise<void> {
+    if (!getCliConfig().debug) console.clear();
+
+    const answer = await select({
+        message: "Login or Logout",
+        choices: [
+            {
+                name: "Login",
+                value: "login",
+                description: "Log into Microsoft",
+            },
+            {
+                name: "Logout",
+                value: "logout",
+                description: "Log out of Microsoft",
+            },
+            {
+                name: "Return",
+                value: "return",
+                description: "Return to the settings menu",
+            },
+        ],
+    });
+
+    switch (answer) {
+        case "login":
+            await loginToMicrosoft();
+            break;
+        case "logout":
+            throw new NotImplementedException;
+            break;
+        case "return":
+            break;
+    }
+}
 
 /**
  * Asks the user his new preferred directory path and returns it

@@ -1,4 +1,4 @@
-import { writeToJsonConfig } from "src/config-service";
+import { writeToSettingsConfig } from "src/config-service";
 import { printDirectoryPathPrompt, printPartialOrFullBackupPrompt, printSettings } from "./menu-renderer";
 import { doFullBackup, doPartialBackup } from "src/backup-service";
 
@@ -19,5 +19,5 @@ export async function handleSettings(): Promise<void> {
 
 export async function handleDirectoryPathInput(): Promise<void> {
     const dirPath = await printDirectoryPathPrompt();
-    await writeToJsonConfig("folderpath", dirPath);
+    await writeToSettingsConfig("folderpath", dirPath);
 }

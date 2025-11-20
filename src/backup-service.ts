@@ -1,5 +1,5 @@
 import { getGameTitle, uploadToCloud } from "src/api/api-service";
-import { getJsonConfig } from "src/config-service";
+import { getSettingsConfig } from "src/config-service";
 import { NotImplementedException } from "src/errors/not-implemented-exception";
 import { scanForScreenshotFolders } from "src/folder-scanner-service";
 import { logger } from "src/utils/logger";
@@ -8,7 +8,7 @@ import { logger } from "src/utils/logger";
  *
  */
 export async function doFullBackup(): Promise<void> {
-    const gameIds = await scanForScreenshotFolders(getJsonConfig().folderpath);
+    const gameIds = await scanForScreenshotFolders(getSettingsConfig().folderpath);
 
     const results = await Promise.allSettled(
         gameIds.map(id => getGameTitle(id)),
