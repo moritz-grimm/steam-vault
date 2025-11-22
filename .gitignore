@@ -14,3 +14,6 @@ steamvault-cache.json
 !/.env
 .env.keys
 
+# auth
+msal-cache.json
+

@@ -1,10 +1,9 @@
 import { input, select } from "@inquirer/prompts";
 import path from "node:path";
 import { isValidDirectory } from "src/utils/filepath-utils";
-import { handleBackup, handleDirectoryPathInput, handleSettings } from "./menu-controller";
+import { handleAuthSettings, handleBackup, handleDirectoryPathInput, handleSettings } from "./menu-controller";
 import { getCliConfig, getSettingsConfig } from "src/config-service";
-import { loginToMicrosoft } from "src/auth/ms-auth";
-import { NotImplementedException } from "src/errors/not-implemented-exception";
+import { loginToMicrosoft, logoutOfMicrosoft } from "src/auth/ms-auth";
 
 // TODO: Refactor from inquirer to inquirer/prompts
 
@@ -96,19 +95,12 @@ export async function printSettings(): Promise<void> {
 export async function printAuthSettings(): Promise<void> {
     if (!getCliConfig().debug) console.clear();
 
+    const authChoices = await handleAuthSettings();
+
     const answer = await select({
         message: "Login or Logout",
         choices: [
-            {
-                name: "Login",
-                value: "login",
-                description: "Log into Microsoft",
-            },
-            {
-                name: "Logout",
-                value: "logout",
-                description: "Log out of Microsoft",
-            },
+            ...authChoices,
             {
                 name: "Return",
                 value: "return",
@@ -122,7 +114,7 @@ export async function printAuthSettings(): Promise<void> {
             await loginToMicrosoft();
             break;
         case "logout":
-            throw new NotImplementedException;
+            await logoutOfMicrosoft();
             break;
         case "return":
             break;

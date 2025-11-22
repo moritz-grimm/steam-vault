@@ -15,7 +15,8 @@ type SettingsConfig = {
 };
 
 type AuthConfig = {
-    entraClientId: string
+    entraClientId: string,
+    msCachePath: string,
 };
 
 type Config = {
@@ -84,7 +85,7 @@ export async function loadAuthConfig(): Promise<AuthConfig> {
 }
 
 /**
- * Load the cli and json configs into cache. This needs to be called on start and everytime something changes on runtime to ensure correct data
+ * Load the cli, settings & auth configs into cache. This needs to be called on start and everytime something changes on runtime to ensure correct data
  */
 export async function loadConfigs(): Promise<void> {
     configCache = {
