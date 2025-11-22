@@ -3,7 +3,6 @@ import { toError } from "../utils/error-utils";
 import { cacheContainsKey, getGameTitleFromCache, writeToCache } from "src/api/api-cache-service";
 import { logger } from "src/utils/logger";
 import { getMicrosoftToken } from "src/auth/ms-auth";
-import { readFileSync } from "node:fs";
 import fs from "node:fs";
 import { exiftool } from "exiftool-vendored";
 
@@ -32,9 +31,7 @@ export async function uploadToOneDrive(gameTitle: string): Promise<void> {
     const filePath = "C:/Program Files (x86)/Steam/userdata/906825544/760/remote/3164500/screenshots/20250921194833_1.jpg";
     const fileName = "20250921194833_1.jpg";
 
-    await ensureFolderExists(folderName);
-
-    const fileBuffer = readFileSync(filePath);
+    const fileBuffer = fs.readFileSync(filePath);
 
     const fileStats = fs.statSync(filePath);
     const creationDate = fileStats.birthtime.toISOString();
@@ -47,7 +44,6 @@ export async function uploadToOneDrive(gameTitle: string): Promise<void> {
     await exiftool.end();
 
     try {
-        // Upload the image itself
         const uploadResponse = await fetch(
             `https://graph.microsoft.com/v1.0/me/drive/special/photos:/${folderName}/${fileName}:/content`,
             {
@@ -68,29 +64,5 @@ export async function uploadToOneDrive(gameTitle: string): Promise<void> {
     } catch (err: unknown) {
         const error = toError(err);
         throw new Error("Error on uploading to OneDrive", error);
-    }
-}
-
-async function ensureFolderExists(folderName: string): Promise<void> {
-    const token = await getMicrosoftToken();
-
-    try {
-        await fetch("https://graph.microsoft.com/v1.0/me/drive/special/photos:/children", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                name: folderName,
-                folder: {},
-                "@microsoft.graph.conflictBehavior": "fail",
-            }),
-        });
-    } catch (err: any) {
-        if (err === 409) {
-            logger.log("info", "Folder already exists");
-        }
-        throw err;
     }
 }
