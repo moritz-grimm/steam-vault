@@ -1,4 +1,4 @@
-import { getGameTitle, uploadToCloud } from "src/api/api-service";
+import { getGameTitle, uploadToOneDrive } from "src/api/api-service";
 import { getSettingsConfig } from "src/config-service";
 import { NotImplementedException } from "src/errors/not-implemented-exception";
 import { scanForScreenshotFolders } from "src/folder-scanner-service";
@@ -16,7 +16,7 @@ export async function doFullBackup(): Promise<void> {
 
     for (const result of results) {
         if (result.status === "fulfilled") {
-            await uploadToCloud(result.value);
+            await uploadToOneDrive(result.value);
         } else {
             logger.log("error", "Failed: " + result.reason);
         }
