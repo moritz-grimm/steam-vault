@@ -1,30 +1,57 @@
+import { exiftool } from "exiftool-vendored";
+import { toError } from "exiftool-vendored/dist/ErrorsAndWarnings";
 import { getGameTitle, uploadToOneDrive } from "src/api/api-service";
 import { getSettingsConfig } from "src/config-service";
 import { NotImplementedException } from "src/errors/not-implemented-exception";
-import { scanForScreenshotFolders } from "src/folder-scanner-service";
+import { scanForScreenshotFolders, scanForScreenshots } from "src/scan-service";
 import { logger } from "src/utils/logger";
 
-/**
- *
- */
+type ScreenshotData = {
+    gameId: string,
+    gameTitle: string,
+    screenshots: string[]; // saved as filenames
+};
+
 export async function doFullBackup(): Promise<void> {
     const gameIds = await scanForScreenshotFolders(getSettingsConfig().folderpath);
 
-    const results = await Promise.allSettled(
-        gameIds.map(id => getGameTitle(id)),
+    const screenshotDataResults: PromiseSettledResult<ScreenshotData>[] = await Promise.allSettled(
+        gameIds.map(async (id) => {
+            const gameTitle = await getGameTitle(id) ?? "";
+            const screenshots = await scanForScreenshots(id);
+
+            return {
+                gameId: id,
+                gameTitle: gameTitle,
+                screenshots,
+            };
+        }),
     );
 
-    for (const result of results) {
-        if (result.status === "fulfilled") {
-            await uploadToOneDrive(result.value);
-        } else {
-            logger.log("error", "Failed: " + result.reason);
+    try {
+        for (const result of screenshotDataResults) {
+            if (result.status === "fulfilled") {
+                const { gameId, gameTitle, screenshots } = result.value;
+
+                for (const screenshot of screenshots) {
+                    try {
+                        await uploadToOneDrive(gameId, gameTitle, screenshot);
+                    } catch (err: unknown) {
+                        const error = toError(err);
+                        logger.log("error", `Failed to upload ${screenshot}: ${error}`);
+                    }
+
+                }
+            } else {
+                logger.log("error", "Failed: " + result.reason);
+            }
         }
+    } finally {
+        console.log("Upload successful");
+        await exiftool.end();
     }
 }
 
 export async function doPartialBackup(iDs: Array<string>): Promise<void> {
     throw new NotImplementedException;
 }
-
-
