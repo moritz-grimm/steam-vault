@@ -17,7 +17,7 @@ export async function printSettings(): Promise<void> {
                 {
                     name: "Folderpath",
                     value: "folderpath",
-                    description: `Current folderpath: '${getSettingsConfig().folderpath}'`,
+                    description: `Current folderpath: '${getSettingsConfig().screenshotFolderPath}'`,
                 },
                 {
                     name: "Auth Setting",

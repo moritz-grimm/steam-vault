@@ -5,6 +5,7 @@ import { logger } from "src/utils/logger";
 import { getMicrosoftToken } from "src/auth/ms-auth";
 import fs from "node:fs";
 import { exiftool } from "exiftool-vendored";
+import { getSettingsConfig } from "src/config-service";
 
 /**
  * Retrieves the title of a Steam game based on its App ID.
@@ -46,13 +47,15 @@ export async function getGameTitle(appId: string): Promise<string | undefined> {
     }
 }
 
+// TODO: Refactor this to follow the SRP
 /**
  * Uploads a Steam screenshot to OneDrive under the user's "Photos/SteamVault" directory.
  *
  * This function performs the following steps:
  * 1. Reads filesystem metadata of the provided screenshot (creation date).
  * 2. Writes EXIF metadata (e.g., DateTimeOriginal, XPComment) into the image file.
- * 3. Uploads the modified file to OneDrive using the Microsoft Graph API.
+ * 3. Uploads the modified file to OneDrive.
+ * 4. Upload the screenshot-hash.json to OneDrive.
  *
  * The upload target folder is automatically created by OneDrive if it does not exist.
  *
@@ -68,7 +71,7 @@ export async function getGameTitle(appId: string): Promise<string | undefined> {
  */
 export async function uploadToOneDrive(gameId: string, gameTitle: string, screenshot: string): Promise<void> {
     const token = await getMicrosoftToken();
-    const filePath = `C:/Program Files (x86)/Steam/userdata/906825544/760/remote/${gameId}/screenshots/${screenshot}`;
+    const filePath = `${getSettingsConfig().screenshotFolderPath}/${gameId}/screenshots/${screenshot}`;
     const fileStats = fs.statSync(filePath);
     const creationDate = fileStats.birthtime.toISOString();
 
@@ -112,6 +115,31 @@ export async function uploadToOneDrive(gameId: string, gameTitle: string, screen
         }
 
         logger.log("info", `Upload of image ${filePath} successful`);
+
+        const screenshotHashJson = fs.readFileSync(getSettingsConfig().screenshotHashes, "utf-8");
+
+        logger.log("info", "Uploading screenshot hash json");
+
+        const jsonUploadResponse = await fetch(
+            `https://graph.microsoft.com/v1.0/me/drive/special/photos:/SteamVault/screenshot-hashes.json:/content`,
+            {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: screenshotHashJson,
+            },
+        );
+
+        if (!jsonUploadResponse.ok) {
+            const errorText = await jsonUploadResponse.text();
+            logger.log("error", `OneDrive Response Status: ${jsonUploadResponse.status}`);
+            logger.log("error", `OneDrive Response Body: ${errorText}`);
+            throw new Error(`Upload failed: ${jsonUploadResponse.statusText}`);
+        }
+
+        logger.log("info", "Upload of hash json successful");
     } catch (err: unknown) {
         const error = toError(err);
         throw new Error(`Error on uploading to OneDrive: ${error.message}`);

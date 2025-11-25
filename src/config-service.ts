@@ -1,28 +1,25 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { getDirname } from "./utils/filepath-utils";
 import { toError } from "./utils/error-utils";
 import { CliOptions, parseCLIArgs } from "src/cli/cli-parser";
+import { loadJsonAsync } from "src/utils/json-utils";
 
-// TODO: Relocate config to appData or somewhere similar
-const settingsConfigPath = path.resolve(getDirname(), "../../steamvault-config.json");
-const authConfigPath = path.resolve(getDirname(), "../../auth-config.json");
+export const settingsConfigPath = path.resolve(process.env.APPDATA || "", "SteamVault/steamvault-config.json");
 
 let configCache: Config | null = null;
 
-type SettingsConfig = {
-    folderpath: string
-};
-
-type AuthConfig = {
+export type SteamVaultConfig = {
+    screenshotFolderPath: string,
+    gameTitleCache: string,
+    screenshotHashes: string,
     entraClientId: string,
-    msCachePath: string,
+    msalCache: string,
+    logDirPath: string,
 };
 
 type Config = {
-    settings: SettingsConfig;
+    settings: SteamVaultConfig;
     cli: CliOptions;
-    auth: AuthConfig,
 };
 
 /**
@@ -33,15 +30,23 @@ type Config = {
  *
  * @throws An error if the file cannot be read or the JSON is invalid.
  *
- * @returns {Promise<SettingsConfig>} Parsed configuration object.
+ * @returns {Promise<SteamVaultConfig>} Parsed configuration object.
  */
-export async function loadSettingsConfig(): Promise<SettingsConfig> {
+export async function loadSettingsConfig(): Promise<SteamVaultConfig> {
     try {
-        const data = await fs.readFile(settingsConfigPath, "utf-8");
-        return JSON.parse(data) as SettingsConfig;
+        const config = await loadJsonAsync(settingsConfigPath) as SteamVaultConfig;
+
+        for (const key of Object.keys(config) as (keyof SteamVaultConfig)[]) {
+            const value = config[key];
+            if (typeof value === "string") {
+                config[key] = resolveConfigPlaceholders(value);
+            }
+        }
+
+        return config;
     } catch (err: unknown) {
         const error = toError(err);
-        throw new Error("Could not load steamvault-config.json", error);
+        throw new Error(`Could not load steamvault-config.json: ${error.message}`);
     }
 }
 
@@ -50,7 +55,7 @@ export async function loadSettingsConfig(): Promise<SettingsConfig> {
  * @param jsonKey The key to be replaced or created
  * @param newValue The value of the previous given key
  */
-export async function writeToSettingsConfig(jsonKey: keyof SettingsConfig, newValue: string): Promise<void> {
+export async function writeToSettingsConfig(jsonKey: keyof SteamVaultConfig, newValue: string): Promise<void> {
     try {
         const fileData = await loadSettingsConfig();
 
@@ -64,24 +69,9 @@ export async function writeToSettingsConfig(jsonKey: keyof SettingsConfig, newVa
     }
 }
 
-/**
- * Reads the auth config from disk
- *
- * Reads the file at `auth-config.json`,
- * parses it as JSON and returns a typed JsonConfig object.
- *
- * @throws An error if the file cannot be read or the JSON is invalid.
- *
- * @returns {Promise<AuthConfig>} Parsed configuration object.
- */
-export async function loadAuthConfig(): Promise<AuthConfig> {
-    try {
-        const data = await fs.readFile(authConfigPath, "utf-8");
-        return JSON.parse(data) as AuthConfig;
-    } catch (err: unknown) {
-        const error = toError(err);
-        throw new Error("Could not load auth-config.sjon", error);
-    }
+function resolveConfigPlaceholders(configString: string): string {
+    return configString
+        .replaceAll("%APPDATA%", process.env.APPDATA || "");
 }
 
 /**
@@ -91,7 +81,6 @@ export async function loadConfigs(): Promise<void> {
     configCache = {
         settings: await loadSettingsConfig(),
         cli: parseCLIArgs(),
-        auth: await loadAuthConfig(),
     };
 }
 
@@ -102,14 +91,10 @@ export function getConfig(): Config {
     return configCache;
 }
 
-export function getSettingsConfig(): SettingsConfig {
+export function getSettingsConfig(): SteamVaultConfig {
     return getConfig().settings;
 }
 
 export function getCliConfig(): CliOptions {
     return getConfig().cli;
-}
-
-export function getAuthConfig(): AuthConfig {
-    return getConfig().auth;
 }

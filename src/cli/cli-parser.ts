@@ -16,6 +16,7 @@ export function parseCLIArgs(): CliOptions {
     program.parse(process.argv);
     const options: CliOptions = program.opts();
 
+    // TODO: Fix the logger printing "undefined" into the console
     logger.log("info", options);
 
     return {

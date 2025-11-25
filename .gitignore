@@ -6,14 +6,9 @@ npm-debug.log
 .DS_Store
 
 # steam-vault
-steamvault-config.json
-steamvault-cache.json
+todo
 /logs
 
 # dotenvx
 !/.env
 .env.keys
-
-# auth
-msal-cache.json
-

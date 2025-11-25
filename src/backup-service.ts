@@ -4,6 +4,7 @@ import { getGameTitle, uploadToOneDrive } from "src/api/api-service";
 import { getSettingsConfig } from "src/config-service";
 import { NotImplementedException } from "src/errors/not-implemented-exception";
 import { scanForScreenshotFolders, scanForScreenshots } from "src/scan-service";
+import { hashExists, hashScreenshot } from "src/utils/hash-utils";
 import { logger } from "src/utils/logger";
 
 type ScreenshotData = {
@@ -13,7 +14,7 @@ type ScreenshotData = {
 };
 
 export async function doFullBackup(): Promise<void> {
-    const gameIds = await scanForScreenshotFolders(getSettingsConfig().folderpath);
+    const gameIds = await scanForScreenshotFolders(getSettingsConfig().screenshotFolderPath);
 
     const screenshotDataResults: PromiseSettledResult<ScreenshotData>[] = await Promise.allSettled(
         gameIds.map(async (id) => {
@@ -35,7 +36,10 @@ export async function doFullBackup(): Promise<void> {
 
                 for (const screenshot of screenshots) {
                     try {
-                        await uploadToOneDrive(gameId, gameTitle, screenshot);
+                        const screenshotHash = hashScreenshot(gameId, screenshot);
+                        if (!hashExists(screenshotHash, gameId, screenshot)) {
+                            await uploadToOneDrive(gameId, gameTitle, screenshot);
+                        }
                     } catch (err: unknown) {
                         const error = toError(err);
                         logger.log("error", `Failed to upload ${screenshot}: ${error}`);

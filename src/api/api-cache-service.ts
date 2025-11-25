@@ -1,9 +1,6 @@
 import fs from "node:fs/promises";
-import path from "node:path";
+import { getSettingsConfig } from "src/config-service";
 import { toError } from "src/utils/error-utils";
-import { getDirname } from "src/utils/filepath-utils";
-
-const cacheFilePath = path.resolve(getDirname(), "../../steamvault-cache.json");
 
 type GameNameCache = Record<string, string>;
 
@@ -14,7 +11,7 @@ export async function writeToCache(appId: string, gameName: string): Promise<voi
         const cache = await loadCache();
         cache[appId] = gameName;
 
-        await fs.writeFile(cacheFilePath, JSON.stringify(cache, null, 2), "utf-8");
+        await fs.writeFile(getSettingsConfig().gameTitleCache, JSON.stringify(cache, null, 2), "utf-8");
 
         memoryCache = cache;
     } catch (err: unknown) {
@@ -28,7 +25,7 @@ export async function loadCache(): Promise<GameNameCache> {
     if (memoryCache) return memoryCache;
 
     try {
-        const cache = await fs.readFile(cacheFilePath, "utf-8");
+        const cache = await fs.readFile(getSettingsConfig().gameTitleCache, "utf-8");
         memoryCache = JSON.parse(cache) as GameNameCache;
         return memoryCache;
     } catch {

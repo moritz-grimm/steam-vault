@@ -1,8 +1,8 @@
-import { loadConfigs } from "src/config-service";
-import "@dotenvx/dotenvx/config";
-import { loginToMicrosoft } from "src/auth/ms-auth";
-import { printMainMenu } from "src/ui/main-menu";
+#!/usr/bin/env node
 
-await loadConfigs();
-await loginToMicrosoft();
+import "@dotenvx/dotenvx/config";
+import { printMainMenu } from "src/ui/main-menu";
+import { initializeApp } from "src/initialize-app";
+
+await initializeApp();
 await printMainMenu();

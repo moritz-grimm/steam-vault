@@ -1,41 +1,25 @@
 import * as msal from "@azure/msal-node";
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
-import path from "node:path";
-import { getAuthConfig } from "src/config-service";
-import { getDirname } from "src/utils/filepath-utils";
+import { getSettingsConfig } from "src/config-service";
 import { logger } from "src/utils/logger";
 
-let cachePathCache: string | null = null;
-
-/**
- * Temporary wrapper until config-service.ts supports lazy async loading.
- *
- * TODO: Remove this once getAuthConfig() is async - then use (await getAuthConfig()).msCachePath directly
- */
-function getCachePath(): string {
-    if (!cachePathCache) {
-        cachePathCache = path.resolve(getDirname(), getAuthConfig().msCachePath);
-    }
-    return cachePathCache;
-}
-
 const beforeCacheAccess = async (cacheContext: msal.TokenCacheContext): Promise<void> => {
-    if (existsSync(getCachePath())) {
-        const cacheData = readFileSync(getCachePath(), "utf-8");
+    if (existsSync(getSettingsConfig().msalCache)) {
+        const cacheData = readFileSync(getSettingsConfig().msalCache, "utf-8");
         cacheContext.tokenCache.deserialize(cacheData);
     }
 };
 
 const afterCacheAccess = async (cacheContext: msal.TokenCacheContext): Promise<void> => {
     if (cacheContext.cacheHasChanged) {
-        writeFileSync(getCachePath(), cacheContext.tokenCache.serialize());
+        writeFileSync(getSettingsConfig().msalCache, cacheContext.tokenCache.serialize());
     }
 };
 
 function getMsalConfig(): msal.Configuration {
     return {
         auth: {
-            clientId: getAuthConfig().entraClientId,
+            clientId: getSettingsConfig().entraClientId,
             authority: "https://login.microsoftonline.com/common",
         },
         cache: {
@@ -91,8 +75,8 @@ export async function logoutOfMicrosoft(): Promise<void> {
         await pca.getTokenCache().removeAccount(acc);
     }
 
-    if (existsSync(getCachePath())) {
-        unlinkSync(getCachePath());
+    if (existsSync(getSettingsConfig().msalCache)) {
+        unlinkSync(getSettingsConfig().msalCache);
     }
 
     logger.log("info", "User successfully logged out.");

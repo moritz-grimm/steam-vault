@@ -6,18 +6,18 @@ export async function printPartialOrFullBackupPrompt(): Promise<void> {
     if (!getCliConfig().debug) console.clear();
 
     const answer = await select({
-        message: "Choose between full or partial backup",
+        message: "Choose between full or partial(wip) backup",
         choices: [
             {
                 name: "Full",
                 value: "full",
                 description: "Backup every screenshot folder",
             },
-            {
-                name: "Partial",
-                value: "partial",
-                description: "Choose a specific folder you want to backup",
-            },
+            // {
+            //     name: "Partial",
+            //     value: "partial",
+            //     description: "Choose a specific folder you want to backup",
+            // },
             {
                 name: "Return",
                 value: "return",

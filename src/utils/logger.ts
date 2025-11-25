@@ -2,9 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { createLogger, format, transports } from "winston";
 
-const logDir = "logs";
-if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir);
+// TODO? Move logger into different folder?
+// TODO: As soon as config-service can load things on top-level replace this through 'getSettingsConfig().logDirPath'
+const LOG_DIR_PATH = path.resolve(process.env.APPDATA || "", "SteamVault/logs");
+
+if (!fs.existsSync(LOG_DIR_PATH)) {
+    fs.mkdirSync(LOG_DIR_PATH);
 }
 
 export const logger = createLogger({
@@ -18,8 +21,8 @@ export const logger = createLogger({
         format.json(),
     ),
     transports: [
-        new transports.File({ filename: path.join(logDir, "error.log"), level: "error" }),
-        new transports.File({ filename: path.join(logDir, "combined.log") }),
+        new transports.File({ filename: path.join(LOG_DIR_PATH, "error.log"), level: "error" }),
+        new transports.File({ filename: path.join(LOG_DIR_PATH, "combined.log") }),
     ],
 });
 
