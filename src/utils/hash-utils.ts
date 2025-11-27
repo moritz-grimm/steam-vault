@@ -64,6 +64,8 @@ export function hashExists(screenshotHash: string, gameId: string, screenshotFil
 
     logger.log("info", "Screenshot not found. Writing to json");
     hashes[gameId][screenshotFileName] = screenshotHash;
+
+    // TODO: If a upload fails. The hash is still written to the json. Fix this
     writeToJson(getSettingsConfig().screenshotHashes, hashes);
 
     return false;
