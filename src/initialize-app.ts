@@ -5,6 +5,7 @@ import { writeToJsonAsync } from "src/utils/json-utils";
 import { loginToMicrosoft } from "src/auth/ms-auth";
 
 const appDataFolder = path.resolve(process.env.APPDATA || "", "SteamVault");
+const backupPath = path.resolve(appDataFolder, "/backup");
 
 const defaultConfig: SteamVaultConfig = {
     screenshotFolderPath: "C:/Program Files (x86)/Steam/userdata/906825544/760/remote",
@@ -13,6 +14,7 @@ const defaultConfig: SteamVaultConfig = {
     entraClientId: "1cb15360-f199-4b94-94de-557b82824079",
     msalCache: "%APPDATA%/SteamVault/msal-cache.json",
     logDirPath: "%APPDATA%/SteamVault/logs",
+    backupPath: "%APPDATA%/SteamVault/backup",
 };
 
 
@@ -30,6 +32,7 @@ const defaultConfig: SteamVaultConfig = {
  */
 export async function initializeApp(): Promise<void> {
     await fs.mkdir(appDataFolder, { recursive: true });
+    await fs.mkdir(backupPath, { recursive: true });
     await loadConfigs();
     await loginToMicrosoft();
 

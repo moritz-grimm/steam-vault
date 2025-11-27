@@ -72,14 +72,44 @@ export async function getGameTitle(appId: string): Promise<string | undefined> {
 export async function uploadToOneDrive(gameId: string, gameTitle: string, screenshot: string): Promise<void> {
     const token = await getMicrosoftToken();
     const filePath = `${getSettingsConfig().screenshotFolderPath}/${gameId}/screenshots/${screenshot}`;
-    const fileStats = fs.statSync(filePath);
-    const creationDate = fileStats.birthtime.toISOString();
+    const backupPath = `${getSettingsConfig().backupPath}/${screenshot}`;
 
-    // TODO: Implement logic to get rid of _original files with ["-overwrite_original"]
-    await exiftool.write(filePath, {
-        DateTimeOriginal: creationDate,
-        XPComment: "Uploaded by SteamVault",
-    });
+    try {
+
+        logger.log("info", "Creating screenshot backup");
+        await fs.promises.copyFile(filePath, backupPath);
+
+        const fileStats = fs.statSync(filePath);
+        const creationDate = fileStats.birthtime.toISOString();
+
+        logger.log("info", "Writing metadata");
+        await exiftool.write(
+            filePath,
+            {
+                DateTimeOriginal: creationDate,
+                XPComment: "Uploaded by SteamVault",
+            },
+            {
+                writeArgs: ["-overwrite_original"],
+            },
+        );
+
+        logger.log("info", "Deleting screenshot backup");
+        await fs.promises.unlink(backupPath);
+
+    } catch (error) {
+        try {
+            logger.log("error", "Error while writing metadata. Trying to restore backup");
+            await fs.promises.copyFile(backupPath, filePath);
+            await fs.promises.unlink(backupPath);
+            logger.log("info", "Backup successfully restored");
+        } catch (error_: unknown) {
+            const err_= toError(error_)
+            throw new Error(`Error while restoring backup: ${err_}`);
+        }
+        throw error;
+    }
+
 
     const fileBuffer = fs.readFileSync(filePath);
 

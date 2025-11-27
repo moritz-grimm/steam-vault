@@ -15,6 +15,7 @@ export type SteamVaultConfig = {
     entraClientId: string,
     msalCache: string,
     logDirPath: string,
+    backupPath: string,
 };
 
 type Config = {
