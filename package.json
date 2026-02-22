@@ -18,7 +18,8 @@
         "lint:fix": "npx eslint --fix",
         "prod": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts",
         "prod:debug": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts --debug",
-        "sort-package-json": "npx sort-package-json"
+        "sort-package-json": "npx sort-package-json",
+        "build": "bun build ./src/steamvault.ts --compile --outfile ./build/steamvault"
     },
     "dependencies": {
         "@azure/msal-node": "^3.8.2",
