@@ -31,7 +31,7 @@ export async function printPartialOrFullBackupPrompt(ctx: Pick<AppContext, "cliO
             await doFullBackup();
             break;
         case "partial":
-            await doPartialBackup();
+            // await doPartialBackup();
             break;
         case "return":
             break;
