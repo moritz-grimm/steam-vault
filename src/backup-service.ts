@@ -3,7 +3,7 @@ import { toError } from "exiftool-vendored/dist/ErrorsAndWarnings";
 import { getGameTitle, uploadToOneDrive } from "src/api/api-service";
 import { getSettingsConfig } from "src/config-service";
 import { NotImplementedException } from "src/errors/not-implemented-exception";
-import { scanForScreenshotFolders, scanForScreenshots } from "src/scan-service";
+import { scanForScreenshotFolders, scanForScreenshots } from "src/utils/scan-utils";
 import { hashExists, hashScreenshot } from "src/utils/hash-utils";
 import { logger } from "src/utils/logger";
 

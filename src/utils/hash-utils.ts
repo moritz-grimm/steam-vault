@@ -13,13 +13,12 @@ type GameHashes = {
     };
 };
 
+// ──────────────────────────────────────────────
+// Legacy exports - remove when all callers are refactored
+// Used by: backup-service.ts
+// ──────────────────────────────────────────────
 /**
- * Hashes a screenshot file using SHA-256 for comparison if the screenshot was already uploaded
- * @param {string} gameId - The Steam game ID corresponding to the game.
- * @param {string} screenshot - The filename of the screenshot to hash.
- * @returns {string} The SHA-256 hash of the screenshot as as hexadecimal string.
- *
- * @throws {Error} If the screenshot file cannot be read (e.g., does not exist or permission denied).
+ * @deprecated Use HashService.hashScreenshot()
  */
 export function hashScreenshot(gameId: string, screenshot: string): string {
     const filePath = `C:/Program Files (x86)/Steam/userdata/906825544/760/remote/${gameId}/screenshots/${screenshot}`;
@@ -28,12 +27,7 @@ export function hashScreenshot(gameId: string, screenshot: string): string {
 }
 
 /**
- * Returns true if the screenshot hash already exists, false otherwise.
- * If false, the hash is added to the JSON file.
- *
- * @param screenshotHash Hash of the screenshot to be uploaded
- * @param gameId Id of the game corresponding to the screenshot
- * @param screenshotFileName Filename of the screenshot to be uploaded
+ * @deprecated Use HashService.hashExists()
  */
 export function hashExists(screenshotHash: string, gameId: string, screenshotFileName: string): boolean {
     let hashes: GameHashes = {};
@@ -71,6 +65,9 @@ export function hashExists(screenshotHash: string, gameId: string, screenshotFil
     return false;
 }
 
+/**
+ * @deprecated Use HashService.compareRemoteAndLocaleHashJson()
+ */
 export function compareRemoteAndLocaleHashJson(): void {
     throw new NotImplementedException;
 }

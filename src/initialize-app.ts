@@ -5,6 +5,7 @@ import { writeToJsonAsync } from "src/utils/json-utils";
 import { AuthService } from "src/auth/ms-auth";
 import { parseCLIArgs } from "src/cli/cli-parser";
 import { createAppLogger } from "src/utils/logger";
+import { HashService } from "src/hash-service";
 
 const appDataFolder = path.resolve(process.env.APPDATA || "", "SteamVault");
 const backupPath = path.resolve(appDataFolder, "/backup");
@@ -49,6 +50,7 @@ export async function initializeApp(): Promise<void> {
     logger.info("CLI options:", cli);
 
     const authService = new AuthService(configService, logger);
+    const hashService = new HashService(configService, logger);
 
     await loadConfigs(); // TODO: Remove as soon as singleton pattern is fully removed
     await authService.login();
