@@ -1,7 +1,6 @@
 import { input, select } from "@inquirer/prompts";
 import path from "node:path";
 import { AppContext } from "src/app-context";
-import { writeToSettingsConfig } from "src/config-service";
 import { printAuthSettings } from "src/ui/settings-menus/auth-settings-menu";
 import { isValidDirectory } from "src/utils/filepath-utils";
 

@@ -1,4 +1,3 @@
-import { getGameTitle } from 'src/api/api-service';
 import axios from "axios";
 import { toError } from "../utils/error-utils";
 import { cacheContainsKey, getGameTitleFromCache, writeToCache } from "src/api/api-cache-service";
@@ -7,7 +6,7 @@ import { AuthService, getMicrosoftToken } from "src/auth/ms-auth";
 import fs from "node:fs";
 import { exiftool } from "exiftool-vendored";
 import { ConfigService, getSettingsConfig, SteamVaultConfig } from "src/config-service";
-import { Logger } from "@azure/msal-node";
+import { Logger } from "winston";
 
 
 export class ApiService {
@@ -21,9 +20,6 @@ export class ApiService {
         return this.configService.get();
     }
 
-    async getGameTitleTitle(appId: string): Promise<string | undefined> {
-        
-    }
 }
 /**
  * Retrieves the title of a Steam game based on its App ID.
@@ -45,6 +41,7 @@ export class ApiService {
  *
  * @throws {never}
  * Errors are caught internally — they will be logged and the function will return `undefined`.
+ * @deprecated Use SteamApiService.getGameTitle() instead
  */
 export async function getGameTitle(appId: string): Promise<string | undefined> {
     if (await cacheContainsKey(appId)) {

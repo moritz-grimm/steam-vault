@@ -1,3 +1,4 @@
+import { GameTitleCache } from "./api/game-title-cache";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { ConfigService, loadConfigs, settingsConfigPath, SteamVaultConfig } from "src/config-service";
@@ -48,6 +49,7 @@ export async function initializeApp(): Promise<AppContext> {
     const configService = await ConfigService.create();
     const logger = createAppLogger();
     logger.info("CLI options:", cliOptions);
+    const gameTitleCache = new GameTitleCache(configService, logger);
 
     const authService = new AuthService(configService, logger);
     const hashService = new HashService(configService, logger);
