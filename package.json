@@ -16,6 +16,7 @@
         "dotenvx:encrypt": "npx dotenvx encrypt",
         "lint": "npx eslint",
         "lint:fix": "npx eslint --fix",
+        "typecheck": "npx tsc --noEmit 2>&1",
         "prod": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts",
         "prod:debug": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts --debug",
         "sort-package-json": "npx sort-package-json",
