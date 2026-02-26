@@ -1,13 +1,13 @@
 import { select } from "@inquirer/prompts";
-import { getCliConfig } from "src/config-service";
+import { AppContext } from "src/app-context";
 import { printPartialOrFullBackupPrompt } from "src/ui/backup-menu";
 import { printSettings } from "src/ui/settings-menus/main-settings-menu";
 
-export async function printMainMenu(): Promise<void> {
+export async function printMainMenu(ctx: Pick<AppContext, "configService" | "cliOptions" | "authService">): Promise<void> {
     let running = true;
 
     while (running) {
-        if (!getCliConfig().debug) console.clear();
+        if (!ctx.cliOptions.debug) console.clear();
 
         const answer = await select({
             message: "Choose an option",
@@ -32,18 +32,16 @@ export async function printMainMenu(): Promise<void> {
 
         switch (answer) {
             case "run backup":
-                await printPartialOrFullBackupPrompt();
+                await printPartialOrFullBackupPrompt(ctx);
                 break;
             case "settings":
-                await printSettings();
+                await printSettings(ctx);
                 break;
             case "exit":
-                if (!getCliConfig().debug) console.clear();
+                if (!ctx.cliOptions.debug) console.clear();
                 console.log("Exiting program");
                 running = false;
                 break;
         }
     }
-};
-
-
+}

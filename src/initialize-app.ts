@@ -6,6 +6,7 @@ import { AuthService } from "src/auth/ms-auth";
 import { parseCLIArgs } from "src/cli/cli-parser";
 import { createAppLogger } from "src/utils/logger";
 import { HashService } from "src/hash-service";
+import { AppContext } from "src/app-context";
 
 const appDataFolder = path.resolve(process.env.APPDATA || "", "SteamVault");
 const backupPath = path.resolve(appDataFolder, "/backup");
@@ -21,7 +22,6 @@ const defaultConfig: SteamVaultConfig = {
     backupPath: "%APPDATA%/SteamVault/backup",
 };
 
-
 /**
  * Initializes the SteamVault application on startup.
  *
@@ -34,7 +34,7 @@ const defaultConfig: SteamVaultConfig = {
  * @returns {Promise<AppContext>} The application context with config, CLI options, and logger
  * @throws {Error} May throw errors during directory creation, config loading, or MS authentication
  */
-export async function initializeApp(): Promise<void> {
+export async function initializeApp(): Promise<AppContext> {
     await fs.mkdir(appDataFolder, { recursive: true });
     await fs.mkdir(backupPath, { recursive: true });
 
@@ -44,14 +44,16 @@ export async function initializeApp(): Promise<void> {
         await writeToJsonAsync(settingsConfigPath, defaultConfig);
     }
 
-    const cli = parseCLIArgs();
+    const cliOptions = parseCLIArgs();
     const configService = await ConfigService.create();
     const logger = createAppLogger();
-    logger.info("CLI options:", cli);
+    logger.info("CLI options:", cliOptions);
 
     const authService = new AuthService(configService, logger);
     const hashService = new HashService(configService, logger);
 
     await loadConfigs(); // TODO: Remove as soon as singleton pattern is fully removed
     await authService.login();
+
+    return { configService, authService, hashService, cliOptions };
 }

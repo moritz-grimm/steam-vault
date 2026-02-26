@@ -1,9 +1,9 @@
 import { select } from "@inquirer/prompts";
+import { AppContext } from "src/app-context";
 import { doFullBackup, doPartialBackup } from "src/backup-service";
-import { getCliConfig } from "src/config-service";
 
-export async function printPartialOrFullBackupPrompt(): Promise<void> {
-    if (!getCliConfig().debug) console.clear();
+export async function printPartialOrFullBackupPrompt(ctx: Pick<AppContext, "cliOptions">): Promise<void> {
+    if (!ctx.cliOptions.debug) console.clear();
 
     const answer = await select({
         message: "Choose between full or partial(wip) backup",

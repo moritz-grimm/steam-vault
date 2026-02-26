@@ -1,15 +1,15 @@
 import { input, select } from "@inquirer/prompts";
 import path from "node:path";
-import { getCliConfig, getSettingsConfig, writeToSettingsConfig } from "src/config-service";
+import { AppContext } from "src/app-context";
+import { writeToSettingsConfig } from "src/config-service";
 import { printAuthSettings } from "src/ui/settings-menus/auth-settings-menu";
-
 import { isValidDirectory } from "src/utils/filepath-utils";
 
-export async function printSettings(): Promise<void> {
+export async function printSettings(ctx: Pick<AppContext, "configService" | "cliOptions" | "authService">): Promise<void> {
     let running = true;
 
     while (running) {
-        if (!getCliConfig().debug) console.clear();
+        if (!ctx.cliOptions.debug) console.clear();
 
         const answer = await select({
             message: "Choose a setting",
@@ -17,7 +17,7 @@ export async function printSettings(): Promise<void> {
                 {
                     name: "Folderpath",
                     value: "folderpath",
-                    description: `Current folderpath: '${getSettingsConfig().screenshotFolderPath}'`,
+                    description: `Current folderpath: '${ctx.configService.get().screenshotFolderPath}'`,
                 },
                 {
                     name: "Auth Setting",
@@ -35,24 +35,24 @@ export async function printSettings(): Promise<void> {
 
         switch (answer) {
             case "folderpath":
-                await handleDirectoryPathInput();
+                await handleDirectoryPathInput(ctx);
                 break;
             case "authSettings":
-                await printAuthSettings();
+                await printAuthSettings(ctx);
                 break;
             case "return":
                 running = false;
                 break;
         };
     }
-};
+}
 
-export async function handleDirectoryPathInput(): Promise<void> {
+export async function handleDirectoryPathInput(ctx: Pick<AppContext, "configService">): Promise<void> {
     const dirPath = await printDirectoryPathPrompt();
     if (!dirPath) {
         return;
     }
-    await writeToSettingsConfig("folderpath", dirPath);
+    await ctx.configService.write("screenshotFolderPath", dirPath);
 }
 
 /**

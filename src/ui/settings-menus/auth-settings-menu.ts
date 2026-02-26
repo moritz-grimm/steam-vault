@@ -1,11 +1,10 @@
 import { select } from "@inquirer/prompts";
-import { isLoggedIn, loginToMicrosoft, logoutOfMicrosoft } from "src/auth/ms-auth";
-import { getCliConfig } from "src/config-service";
+import { AppContext } from "src/app-context";
 
-export async function printAuthSettings(): Promise<void> {
-    if (!getCliConfig().debug) console.clear();
+export async function printAuthSettings(ctx: Pick<AppContext, "cliOptions" | "authService">): Promise<void> {
+    if (!ctx.cliOptions.debug) console.clear();
 
-    const loggedIn = await isLoggedIn();
+    const loggedIn = await ctx.authService.isLoggedIn();
 
     const authChoices = loggedIn
         ? [
@@ -37,10 +36,10 @@ export async function printAuthSettings(): Promise<void> {
 
     switch (answer) {
         case "login":
-            await loginToMicrosoft();
+            await ctx.authService.login();
             break;
         case "logout":
-            await logoutOfMicrosoft();
+            await ctx.authService.logout();
             break;
         case "return":
             break;

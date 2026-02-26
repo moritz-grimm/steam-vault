@@ -1,12 +1,30 @@
+import { getGameTitle } from 'src/api/api-service';
 import axios from "axios";
 import { toError } from "../utils/error-utils";
 import { cacheContainsKey, getGameTitleFromCache, writeToCache } from "src/api/api-cache-service";
 import { logger } from "src/utils/logger";
-import { getMicrosoftToken } from "src/auth/ms-auth";
+import { AuthService, getMicrosoftToken } from "src/auth/ms-auth";
 import fs from "node:fs";
 import { exiftool } from "exiftool-vendored";
-import { getSettingsConfig } from "src/config-service";
+import { ConfigService, getSettingsConfig, SteamVaultConfig } from "src/config-service";
+import { Logger } from "@azure/msal-node";
 
+
+export class ApiService {
+    constructor(
+        private readonly configService: ConfigService,
+        private readonly logger: Logger,
+        private readonly authService: AuthService,
+    ) {}
+
+    private get config(): SteamVaultConfig {
+        return this.configService.get();
+    }
+
+    async getGameTitleTitle(appId: string): Promise<string | undefined> {
+        
+    }
+}
 /**
  * Retrieves the title of a Steam game based on its App ID.
  *

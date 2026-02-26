@@ -1,11 +1,12 @@
 import { exiftool } from "exiftool-vendored";
 import { toError } from "exiftool-vendored/dist/ErrorsAndWarnings";
 import { getGameTitle, uploadToOneDrive } from "src/api/api-service";
-import { getSettingsConfig } from "src/config-service";
+import { ConfigService, getSettingsConfig, SteamVaultConfig } from "src/config-service";
 import { NotImplementedException } from "src/errors/not-implemented-exception";
 import { scanForScreenshotFolders, scanForScreenshots } from "src/utils/scan-utils";
 import { hashExists, hashScreenshot } from "src/utils/hash-utils";
 import { logger } from "src/utils/logger";
+import { Logger } from "winston";
 
 type ScreenshotData = {
     gameId: string,
@@ -13,6 +14,20 @@ type ScreenshotData = {
     screenshots: string[]; // saved as filenames
 };
 
+export class BackupService {
+    constructor(
+        private readonly configService: ConfigService,
+        private readonly logger: Logger,
+    ) {}
+
+    private get config(): SteamVaultConfig {
+        return this.configService.get();
+    }
+
+
+}
+
+/** @deprecated Use BackupService.doFullBackup() */
 export async function doFullBackup(): Promise<void> {
     const gameIds = await scanForScreenshotFolders(getSettingsConfig().screenshotFolderPath);
 
