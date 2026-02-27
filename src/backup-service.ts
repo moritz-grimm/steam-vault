@@ -27,7 +27,7 @@ export class BackupService {
 
 }
 
-/** @deprecated Use BackupService.doFullBackup() */
+/** @deprecated Use BackupService.doFullBackup() instead */
 export async function doFullBackup(): Promise<void> {
     const gameIds = await scanForScreenshotFolders(getSettingsConfig().screenshotFolderPath);
 

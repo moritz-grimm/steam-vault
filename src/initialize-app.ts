@@ -8,6 +8,7 @@ import { parseCLIArgs } from "src/cli/cli-parser";
 import { createAppLogger } from "src/utils/logger";
 import { HashService } from "src/hash-service";
 import { AppContext } from "src/app-context";
+import { OneDriveService } from "src/api/onedrive-service";
 
 const appDataFolder = path.resolve(process.env.APPDATA || "", "SteamVault");
 const backupPath = path.resolve(appDataFolder, "/backup");
@@ -53,6 +54,7 @@ export async function initializeApp(): Promise<AppContext> {
 
     const authService = new AuthService(configService, logger);
     const hashService = new HashService(configService, logger);
+    const onedriveService = new OneDriveService(configService, logger, authService);
 
     await loadConfigs(); // TODO: Remove as soon as singleton pattern is fully removed
     await authService.login();
