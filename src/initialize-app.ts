@@ -13,7 +13,7 @@ import { createAppLogger } from "src/utils/logger";
 import { GameTitleCache } from "./api/game-title-cache";
 
 const appDataFolder = path.resolve(process.env.APPDATA || "", "SteamVault");
-const backupPath = path.resolve(appDataFolder, "/backup");
+const backupPath = path.resolve(appDataFolder, "backup");
 
 const defaultConfig: SteamVaultConfig = {
     screenshotFolderPath: "",
