@@ -72,5 +72,5 @@ export async function printDirectoryPathPrompt(): Promise<string | null> {
 
     if (userInput.toLowerCase() === "exit") return null;
 
-    return path.resolve(userInput);
+    return path.resolve(userInput).replaceAll("\\", "/");
 }
