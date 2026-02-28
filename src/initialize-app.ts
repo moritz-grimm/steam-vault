@@ -6,7 +6,7 @@ import { AppContext } from "src/app-context";
 import { AuthService } from "src/auth/ms-auth";
 import { BackupService } from "src/backup-service";
 import { parseCLIArgs } from "src/cli/cli-parser";
-import { ConfigService, settingsConfigPath, SteamVaultConfig } from "src/config-service";
+import { ConfigService, configPath, SteamVaultConfig } from "src/config-service";
 import { HashService } from "src/hash-service";
 import { writeToJsonAsync } from "src/utils/json-utils";
 import { createAppLogger } from "src/utils/logger";
@@ -18,10 +18,10 @@ const backupPath = path.resolve(appDataFolder, "/backup");
 const defaultConfig: SteamVaultConfig = {
     // screenshotFolderPath: "C:/Program Files (x86)/Steam/userdata/906825544/760/remote",
     screenshotFolderPath: "", //TODO: If empty ask user for a path
-    gameTitleCache: "%APPDATA%/SteamVault/gametitle-cache.json",
-    screenshotHashes: "%APPDATA%/SteamVault/screenshot-hashes.json",
+    gameTitleCache: "%APPDATA%/SteamVault/game-title.cache.json",
+    screenshotHashes: "%APPDATA%/SteamVault/screenshot.hashes.json",
     entraClientId: "1cb15360-f199-4b94-94de-557b82824079",
-    msalCache: "%APPDATA%/SteamVault/msal-cache.json",
+    msalCache: "%APPDATA%/SteamVault/msal.cache.json",
     logDirPath: "%APPDATA%/SteamVault/logs",
     backupPath: "%APPDATA%/SteamVault/backup",
 };
@@ -43,9 +43,9 @@ export async function initializeApp(): Promise<AppContext> {
     await fs.mkdir(backupPath, { recursive: true });
 
     try {
-        await fs.access(settingsConfigPath);
+        await fs.access(configPath);
     } catch {
-        await writeToJsonAsync(settingsConfigPath, defaultConfig);
+        await writeToJsonAsync(configPath, defaultConfig);
     }
 
     const cliOptions = parseCLIArgs();

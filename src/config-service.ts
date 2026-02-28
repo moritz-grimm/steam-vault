@@ -3,7 +3,7 @@ import path from "node:path";
 import { loadJsonAsync } from "src/utils/json-utils";
 import { toError } from "./utils/error-utils";
 
-export const settingsConfigPath = path.resolve(process.env.APPDATA || "", "SteamVault/steamvault-config.json");
+export const configPath = path.resolve(process.env.APPDATA || "", "SteamVault/steamvault.config.json");
 
 export type SteamVaultConfig = {
     screenshotFolderPath: string,
@@ -22,7 +22,7 @@ function resolveConfigPlaceholders(configString: string): string {
 
 async function loadFromDisk(): Promise<SteamVaultConfig> {
     try {
-        const config = await loadJsonAsync(settingsConfigPath) as SteamVaultConfig;
+        const config = await loadJsonAsync(configPath) as SteamVaultConfig;
 
         for (const key of Object.keys(config) as (keyof SteamVaultConfig)[]) {
             const value = config[key];
@@ -38,9 +38,6 @@ async function loadFromDisk(): Promise<SteamVaultConfig> {
     }
 }
 
-// ──────────────────────────────────────────────
-// ConfigService
-// ──────────────────────────────────────────────
 // This needs to be passed around as the service and not just a snapshot of the config file to ensure configFile is always up to date
 export class ConfigService {
     private config: SteamVaultConfig;
@@ -66,7 +63,7 @@ export class ConfigService {
         this.config[jsonKey] = newValue;
 
         try {
-            await fs.writeFile(settingsConfigPath, JSON.stringify(this.config, null, 2), "utf-8");
+            await fs.writeFile(configPath, JSON.stringify(this.config, null, 2), "utf-8");
             await this.reload();
         } catch (err: unknown) {
             const error = toError(err);
