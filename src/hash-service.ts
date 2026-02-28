@@ -1,10 +1,9 @@
-import fs from "node:fs";
+import { readFile } from "node:fs/promises";
 import crypto from "node:crypto";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
 import { NotImplementedException } from "src/errors/not-implemented-exception";
-import { loadJson, writeToJson } from "src/utils/json-utils";
+import { loadJsonAsync, writeToJsonAsync } from "src/utils/json-utils";
 import { Logger } from "winston";
-import { toError } from "exiftool-vendored/dist/ErrorsAndWarnings";
 
 // TODO: Add comment to file telling to not modify this file
 type GameHashes = {
@@ -17,7 +16,7 @@ type GameHashes = {
 // HashService
 // ──────────────────────────────────────────────
 export class HashService {
-    constructor(
+    public constructor(
         private readonly configService: ConfigService,
         private readonly logger: Logger,
     ) {}
@@ -34,58 +33,57 @@ export class HashService {
      *
      * @throws {Error} If the screenshot file cannot be read (e.g., does not exist or permission denied).
      */
-    hashScreenshot(gameId: string, screenshot: string): string {
+    public async hashScreenshot(gameId: string, screenshot: string): Promise<string> {
         const filePath = `C:/Program Files (x86)/Steam/userdata/906825544/760/remote/${gameId}/screenshots/${screenshot}`;
-        const fileBuffer = fs.readFileSync(filePath);
+        const fileBuffer = await readFile(filePath);
         return crypto.createHash("sha256").update(fileBuffer).digest("hex");
     }
 
     /**
      * Returns true if the screenshot hash already exists, false otherwise.
-     * If false, the hash is added to the JSON file.
      *
-     * @param screenshotHash Hash of the screenshot to be uploaded
-     * @param gameId Id of the game corresponding to the screenshot
-     * @param filename Filename of the screenshot to be uploaded
+     * @param screenshotHash Hash of the screenshot to be checked
      */
-    public exists(screenshotHash: string, gameId: string, filename: string): boolean {
+    public async exists(screenshotHash: string): Promise<boolean> {
         let hashes: GameHashes = {};
 
-        if (fs.existsSync(this.config.screenshotHashes)) {
-            try {
-                // TODO: Implement first comparing remote hash json to local json before doing the screenshot comparing
-                // compareRemoteAndLocaleHashJson();
-                hashes = loadJson(this.config.screenshotHashes) as GameHashes;
-            } catch (err: unknown) {
-                const error = toError(err);
-                throw new Error(`Error loading screenshot-hashes.json: ${error.message}`);
+        try {
+            hashes = await loadJsonAsync(this.config.screenshotHashes) as GameHashes;
+        } catch (err) {
+            if ((err as NodeJS.ErrnoException).code !== "ENOENT") { // To prevent error logging on first start if there are no entries yet
+                this.logger.error("Error loading screenshot-hashes.json", err);
             }
         }
 
-        for (const gId in hashes) {
-            for (const fileName in hashes[gId]) {
-                if (hashes[gId][fileName] === screenshotHash) {
-                    this.logger.info("Screenshot found in 'screenshot-hashes.json'");
-                    return true;
-                }
+        return Object.values(hashes).some(game =>
+            Object.values(game).includes(screenshotHash),
+        );
+    }
+
+    public async add(gameId: string, filename: string, screenshotHash: string): Promise<void> {
+        let hashes: GameHashes = {};
+
+        try {
+            hashes = await loadJsonAsync(this.config.screenshotHashes) as GameHashes;
+        } catch (err) {
+            if ((err as NodeJS.ErrnoException).code !== "ENOENT") { // To prevent error logging on first start if there are no entries yet
+                this.logger.error("Error loading screenshot-hashes.json", err);
             }
         }
+
+        // Check already loaded file to avoid loading same file twice via .exists
+        const alreadyExists = Object.values(hashes).some(game =>
+            Object.values(game).includes(screenshotHash),
+        );
+        if (alreadyExists) return;
 
         if (!hashes[gameId]) {
             hashes[gameId] = {};
         }
 
-        this.logger.info("Screenshot not found. Writing to json");
         hashes[gameId][filename] = screenshotHash;
 
-        // TODO: If a upload fails. The hash is still written to the json. Fix this
-        writeToJson(this.config.screenshotHashes, hashes);
-
-        return false;
-    }
-
-    public add(gameId: string, filename: string, screenshotHash: string): void {
-        
+        await writeToJsonAsync(this.config.screenshotHashes, hashes);
     }
 
     compareRemoteAndLocaleHashJson(): void {

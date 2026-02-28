@@ -3,7 +3,7 @@ import { AppContext } from "src/app-context";
 import { printPartialOrFullBackupPrompt } from "src/ui/backup-menu";
 import { printSettings } from "src/ui/settings-menus/main-settings-menu";
 
-export async function printMainMenu(ctx: Pick<AppContext, "configService" | "cliOptions" | "authService">): Promise<void> {
+export async function printMainMenu(ctx: Pick<AppContext, "configService" | "cliOptions" | "authService" | "backupService">): Promise<void> {
     let running = true;
 
     while (running) {

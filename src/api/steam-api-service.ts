@@ -12,12 +12,12 @@ type SteamApiResponse = {
 };
 
 export class SteamApiService {
-    constructor(
+    public constructor(
         private readonly logger: Logger,
         private readonly gameTitleCache: GameTitleCache,
-    ) { }
+    ) {}
 
-    async getGameTitle(appId: string): Promise<string | undefined> {
+    public async getGameTitle(appId: string): Promise<string | undefined> {
         if (await this.gameTitleCache.has(appId)) {
             this.logger.info(`${appId} found in cache`);
             return this.gameTitleCache.get(appId);

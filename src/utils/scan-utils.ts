@@ -23,7 +23,7 @@ export async function scanForScreenshotFolders(folderpath: string): Promise<Arra
 };
 
 export async function scanForScreenshots(gameId: string): Promise<Array<string>> {
-    const folderPath = `C:/Program Files (x86)/Steam/userdata/906825544/760/remote/${gameId}/screenshots`;
+    const folderPath = `C:/Program Files (x86)/Steam/userdata/906825544/760/remote/${gameId}/screenshots`; // TODO: Remove hardcoded path
 
     const files = await fs.readdir(folderPath);
     return files.filter(file => /\.(png|jpg|jpeg)$/i.test(file));

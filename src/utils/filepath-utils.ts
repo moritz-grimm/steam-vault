@@ -1,6 +1,6 @@
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import fs from "node:fs";
 
 /**
  * Returns the absolute path of the directory in which the current module file is located.

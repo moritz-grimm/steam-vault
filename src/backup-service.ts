@@ -1,12 +1,10 @@
 import { exiftool } from "exiftool-vendored";
-import { getGameTitle, uploadToOneDrive } from "src/api/api-service";
+import { OneDriveService } from "src/api/onedrive-service";
 import { SteamApiService } from "src/api/steam-api-service";
-import { ConfigService, getSettingsConfig, SteamVaultConfig } from "src/config-service";
+import { ConfigService, SteamVaultConfig } from "src/config-service";
 import { NotImplementedException } from "src/errors/not-implemented-exception";
 import { HashService } from "src/hash-service";
 import { toError } from "src/utils/error-utils";
-import { hashExists, hashScreenshot } from "src/utils/hash-utils";
-import { logger } from "src/utils/logger";
 import { scanForScreenshotFolders, scanForScreenshots } from "src/utils/scan-utils";
 import { Logger } from "winston";
 
@@ -22,6 +20,7 @@ export class BackupService {
         private readonly logger: Logger,
         private readonly steamApiService: SteamApiService,
         private readonly hashService: HashService,
+        private readonly onedriveService: OneDriveService,
     ) {}
 
     private get config(): SteamVaultConfig {
@@ -44,79 +43,34 @@ export class BackupService {
             }),
         );
 
-         try {
-        for (const game of gameScreenshots) {
-            if (game.status === "fulfilled") {
-                const { gameId, gameTitle, filenames } = game.value;
+        try {
+            for (const game of gameScreenshots) {
+                if (game.status === "fulfilled") {
+                    const { gameId, gameTitle, filenames } = game.value;
 
-                for (const filename of filenames) {
-                    try {
-                        const screenshotHash = this.hashService.hashScreenshot(gameId, filename);
-                        if (!this.hashService.exists(screenshotHash, gameId, filename)) {
-                            await uploadToOneDrive(gameId, gameTitle, screenshot);
+                    for (const filename of filenames) {
+                        try {
+                            const screenshotHash = await this.hashService.hashScreenshot(gameId, filename);
+                            if (!await this.hashService.exists(screenshotHash)) {
+                                await this.onedriveService.uploadScreenshot(gameId, gameTitle, filename);
+                                await this.hashService.add(gameId, filename, screenshotHash);
+                            }
+                        } catch (err: unknown) {
+                            this.logger.error(`Failed to upload file: ${filename}`, toError(err));
                         }
-                    } catch (err: unknown) {
-                        const error = toError(err);
-                        logger.log("error", `Failed to upload ${screenshot}: ${error}`);
                     }
-
+                } else {
+                    this.logger.error(`Failed to load data`, game.reason);
                 }
-            } else {
-                logger.log("error", "Failed: " + result.reason);
             }
+        } finally {
+            await this.onedriveService.uploadHashJson();
+            await exiftool.end();
+            console.log("Upload successful");
         }
-    } finally {
-        console.log("Upload successful");
-        await exiftool.end();
-    
     }
 
-}
-
-/** @deprecated Use BackupService.runFull() instead */
-export async function doFullBackup(): Promise<void> {
-    const gameIds = await scanForScreenshotFolders(getSettingsConfig().screenshotFolderPath);
-
-    const screenshotDataResults: PromiseSettledResult<ScreenshotData>[] = await Promise.allSettled(
-        gameIds.map(async(id) => {
-            const gameTitle = await getGameTitle(id) ?? "";
-            const screenshots = await scanForScreenshots(id);
-
-            return {
-                gameId: id,
-                gameTitle: gameTitle,
-                screenshots,
-            };
-        }),
-    );
-
-    try {
-        for (const result of screenshotDataResults) {
-            if (result.status === "fulfilled") {
-                const { gameId, gameTitle, screenshots } = result.value;
-
-                for (const screenshot of screenshots) {
-                    try {
-                        const screenshotHash = hashScreenshot(gameId, screenshot);
-                        if (!hashExists(screenshotHash, gameId, screenshot)) {
-                            await uploadToOneDrive(gameId, gameTitle, screenshot);
-                        }
-                    } catch (err: unknown) {
-                        const error = toError(err);
-                        logger.log("error", `Failed to upload ${screenshot}: ${error}`);
-                    }
-
-                }
-            } else {
-                logger.log("error", "Failed: " + result.reason);
-            }
-        }
-    } finally {
-        console.log("Upload successful");
-        await exiftool.end();
+    public async runPartial(iDs: Array<string>): Promise<void> {
+        throw new NotImplementedException;
     }
-}
-
-export async function doPartialBackup(iDs: Array<string>): Promise<void> {
-    throw new NotImplementedException;
 }

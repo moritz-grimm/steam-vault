@@ -1,8 +1,7 @@
 import { select } from "@inquirer/prompts";
 import { AppContext } from "src/app-context";
-import { doFullBackup, doPartialBackup } from "src/backup-service";
 
-export async function printPartialOrFullBackupPrompt(ctx: Pick<AppContext, "cliOptions">): Promise<void> {
+export async function printPartialOrFullBackupPrompt(ctx: Pick<AppContext, "cliOptions" | "backupService">): Promise<void> {
     if (!ctx.cliOptions.debug) console.clear();
 
     const answer = await select({
@@ -28,10 +27,10 @@ export async function printPartialOrFullBackupPrompt(ctx: Pick<AppContext, "cliO
 
     switch (answer) {
         case "full":
-            await doFullBackup();
+            await ctx.backupService.runFull();
             break;
         case "partial":
-            // await doPartialBackup();
+            await ctx.backupService.runPartial();
             break;
         case "return":
             break;

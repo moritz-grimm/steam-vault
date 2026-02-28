@@ -30,17 +30,17 @@ export class GameTitleCache {
         }
     }
 
-    async get(appId: string): Promise<string | undefined> {
+    public async get(appId: string): Promise<string | undefined> {
         const entries = await this.loadFromDisk();
         return entries[appId];
     }
 
-    async has(appId: string): Promise<boolean> {
+    public async has(appId: string): Promise<boolean> {
         const entries = await this.loadFromDisk();
         return appId in entries;
     }
 
-    async set(appId: string, gameTitle: string): Promise<void> {
+    public async set(appId: string, gameTitle: string): Promise<void> {
         const entries = await this.loadFromDisk();
         entries[appId] = gameTitle;
 

@@ -1,8 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { toError } from "./utils/error-utils";
-import { CliOptions, parseCLIArgs } from "src/cli/cli-parser";
 import { loadJsonAsync } from "src/utils/json-utils";
+import { toError } from "./utils/error-utils";
 
 export const settingsConfigPath = path.resolve(process.env.APPDATA || "", "SteamVault/steamvault-config.json");
 
@@ -50,12 +49,12 @@ export class ConfigService {
         this.config = config;
     }
 
-    static async create(): Promise<ConfigService> {
+    public static async create(): Promise<ConfigService> {
         const config = await loadFromDisk();
         return new ConfigService(config);
     }
 
-    get(): SteamVaultConfig {
+    public get(): SteamVaultConfig {
         return this.config;
     }
 
@@ -63,7 +62,7 @@ export class ConfigService {
         this.config = await loadFromDisk();
     }
 
-    async write(jsonKey: keyof SteamVaultConfig, newValue: string): Promise<void> {
+    public async write(jsonKey: keyof SteamVaultConfig, newValue: string): Promise<void> {
         this.config[jsonKey] = newValue;
 
         try {
@@ -74,60 +73,4 @@ export class ConfigService {
             throw new Error(`Could not write to steamvault-config.json: ${error.message}`);
         }
     }
-}
-
-// ──────────────────────────────────────────────
-// Legacy singleton - remove when all services are refactored
-// ──────────────────────────────────────────────
-type Config = {
-    settings: SteamVaultConfig;
-    cli: CliOptions;
-};
-
-let configCache: Config | null = null;
-
-/** @deprecated Use ConfigService.create() + ConfigService.get() */
-export async function loadSettingsConfig(): Promise<SteamVaultConfig> {
-    return loadFromDisk();
-}
-
-/** @deprecated Use ConfigService.write() */
-export async function writeToSettingsConfig(jsonKey: keyof SteamVaultConfig, newValue: string): Promise<void> {
-    try {
-        const fileData = await loadSettingsConfig();
-
-        fileData[jsonKey] = newValue;
-
-        await fs.writeFile(settingsConfigPath, JSON.stringify(fileData, null, 2), "utf-8");
-        await loadConfigs();
-    } catch (err: unknown) {
-        const error = toError(err);
-        throw new Error("Could not write to steamvault-config.json", error);
-    }
-}
-
-/** @deprecated Remove when singleton is fully replaced */
-export async function loadConfigs(): Promise<void> {
-    configCache = {
-        settings: await loadSettingsConfig(),
-        cli: parseCLIArgs(),
-    };
-}
-
-/** @deprecated Use ConfigService.get() */
-export function getConfig(): Config {
-    if (!configCache) {
-        throw new Error("Config not loaded! Call loadConfig() first.");
-    }
-    return configCache;
-}
-
-/** @deprecated Use ConfigService.get() */
-export function getSettingsConfig(): SteamVaultConfig {
-    return getConfig().settings;
-}
-
-/** @deprecated Use parseCLIArgs() directly */
-export function getCliConfig(): CliOptions {
-    return getConfig().cli;
 }

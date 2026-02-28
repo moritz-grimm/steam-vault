@@ -49,7 +49,7 @@ export class AuthService {
         return new msal.PublicClientApplication(this.getMsalConfig());
     }
 
-    async login(): Promise<msal.AuthenticationResult | null | undefined> {
+    public async login(): Promise<msal.AuthenticationResult | null | undefined> {
         const pca = this.createClient();
         const accounts = await pca.getTokenCache().getAllAccounts();
 
@@ -77,7 +77,7 @@ export class AuthService {
         }
     }
 
-    async logout(): Promise<void> {
+    public async logout(): Promise<void> {
         const pca = this.createClient();
         const accounts = await pca.getTokenCache().getAllAccounts();
         const msalCache = this.config.msalCache;
@@ -98,108 +98,15 @@ export class AuthService {
         this.logger.info("User successfully logged out.");
     }
 
-    async getToken(): Promise<string> {
+    public async getToken(): Promise<string> {
         const loginResponse = await this.login();
         if (!loginResponse) throw new Error("Could not authenticate");
         return loginResponse.accessToken;
     }
 
-    async isLoggedIn(): Promise<boolean> {
+    public async isLoggedIn(): Promise<boolean> {
         const pca = this.createClient();
         const accounts = await pca.getTokenCache().getAllAccounts();
         return accounts.length > 0;
     }
-}
-
-// ──────────────────────────────────────────────
-// Legacy exports - remove when all callers are refactored
-// Used by: auth-settings-menu.ts, api-service.ts
-// ──────────────────────────────────────────────
-
-import { getSettingsConfig } from "src/config-service";
-
-const legacyBeforeCacheAccess = async (cacheContext: msal.TokenCacheContext): Promise<void> => {
-    if (existsSync(getSettingsConfig().msalCache)) {
-        const cacheData = readFileSync(getSettingsConfig().msalCache, "utf-8");
-        cacheContext.tokenCache.deserialize(cacheData);
-    }
-};
-
-const legacyAfterCacheAccess = async (cacheContext: msal.TokenCacheContext): Promise<void> => {
-    if (cacheContext.cacheHasChanged) {
-        writeFileSync(getSettingsConfig().msalCache, cacheContext.tokenCache.serialize());
-    }
-};
-
-function legacyGetMsalConfig(): msal.Configuration {
-    return {
-        auth: {
-            clientId: getSettingsConfig().entraClientId,
-            authority: "https://login.microsoftonline.com/common",
-        },
-        cache: {
-            cachePlugin: {
-                beforeCacheAccess: legacyBeforeCacheAccess,
-                afterCacheAccess: legacyAfterCacheAccess,
-            },
-        },
-    };
-}
-
-/** @deprecated Use AuthService.login() */
-export async function loginToMicrosoft(): Promise<msal.AuthenticationResult | null | undefined> {
-    const pca = new msal.PublicClientApplication(legacyGetMsalConfig());
-    const accounts = await pca.getTokenCache().getAllAccounts();
-
-    if (accounts.length > 0) {
-        const silentResult = await pca.acquireTokenSilent({
-            scopes: SCOPES,
-            account: accounts[0],
-        });
-        return silentResult;
-    }
-
-    const deviceCodeRequest: msal.DeviceCodeRequest = {
-        scopes: SCOPES,
-        deviceCodeCallback: (response) => {
-            console.log(response.message);
-        },
-    };
-
-    try {
-        const response = await pca.acquireTokenByDeviceCode(deviceCodeRequest);
-        return response;
-    } catch (error) {
-        console.error("Login failed:", error);
-    }
-}
-
-/** @deprecated Use AuthService.logout() */
-export async function logoutOfMicrosoft(): Promise<void> {
-    const pca = new msal.PublicClientApplication(legacyGetMsalConfig());
-    const accounts = await pca.getTokenCache().getAllAccounts();
-
-    if (accounts.length === 0) return;
-
-    for (const acc of accounts) {
-        await pca.getTokenCache().removeAccount(acc);
-    }
-
-    if (existsSync(getSettingsConfig().msalCache)) {
-        unlinkSync(getSettingsConfig().msalCache);
-    }
-}
-
-/** @deprecated Use AuthService.getToken() */
-export async function getMicrosoftToken(): Promise<string> {
-    const loginResponse = await loginToMicrosoft();
-    if (!loginResponse) throw new Error("Could not authenticate");
-    return loginResponse.accessToken;
-}
-
-/** @deprecated Use AuthService.isLoggedIn() */
-export async function isLoggedIn(): Promise<boolean> {
-    const pca = new msal.PublicClientApplication(legacyGetMsalConfig());
-    const accounts = await pca.getTokenCache().getAllAccounts();
-    return accounts.length > 0;
 }

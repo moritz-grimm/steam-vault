@@ -1,14 +1,16 @@
-import { GameTitleCache } from "./api/game-title-cache";
-import path from "node:path";
 import fs from "node:fs/promises";
-import { ConfigService, loadConfigs, settingsConfigPath, SteamVaultConfig } from "src/config-service";
-import { writeToJsonAsync } from "src/utils/json-utils";
-import { AuthService } from "src/auth/ms-auth";
-import { parseCLIArgs } from "src/cli/cli-parser";
-import { createAppLogger } from "src/utils/logger";
-import { HashService } from "src/hash-service";
-import { AppContext } from "src/app-context";
+import path from "node:path";
 import { OneDriveService } from "src/api/onedrive-service";
+import { SteamApiService } from "src/api/steam-api-service";
+import { AppContext } from "src/app-context";
+import { AuthService } from "src/auth/ms-auth";
+import { BackupService } from "src/backup-service";
+import { parseCLIArgs } from "src/cli/cli-parser";
+import { ConfigService, settingsConfigPath, SteamVaultConfig } from "src/config-service";
+import { HashService } from "src/hash-service";
+import { writeToJsonAsync } from "src/utils/json-utils";
+import { createAppLogger } from "src/utils/logger";
+import { GameTitleCache } from "./api/game-title-cache";
 
 const appDataFolder = path.resolve(process.env.APPDATA || "", "SteamVault");
 const backupPath = path.resolve(appDataFolder, "/backup");
@@ -55,9 +57,10 @@ export async function initializeApp(): Promise<AppContext> {
     const authService = new AuthService(configService, logger);
     const hashService = new HashService(configService, logger);
     const onedriveService = new OneDriveService(configService, logger, authService);
+    const steamApiService = new SteamApiService(logger, gameTitleCache);
+    const backupService = new BackupService(configService, logger, steamApiService, hashService, onedriveService);
 
-    await loadConfigs(); // TODO: Remove as soon as singleton pattern is fully removed
     await authService.login();
 
-    return { configService, authService, hashService, cliOptions };
+    return { configService, authService, cliOptions, backupService };
 }
