@@ -46,12 +46,13 @@ export async function printSettings(ctx: Pick<AppContext, "configService" | "cli
     }
 }
 
-export async function handleDirectoryPathInput(ctx: Pick<AppContext, "configService">): Promise<void> {
+export async function handleDirectoryPathInput(ctx: Pick<AppContext, "configService">): Promise<boolean> {
     const dirPath = await printDirectoryPathPrompt();
     if (!dirPath) {
-        return;
+        return false;
     }
     await ctx.configService.write("screenshotFolderPath", dirPath);
+    return true;
 }
 
 /**

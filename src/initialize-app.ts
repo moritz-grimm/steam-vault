@@ -16,8 +16,7 @@ const appDataFolder = path.resolve(process.env.APPDATA || "", "SteamVault");
 const backupPath = path.resolve(appDataFolder, "/backup");
 
 const defaultConfig: SteamVaultConfig = {
-    // screenshotFolderPath: "C:/Program Files (x86)/Steam/userdata/906825544/760/remote",
-    screenshotFolderPath: "", //TODO: If empty ask user for a path
+    screenshotFolderPath: "",
     gameTitleCache: "%APPDATA%/SteamVault/game-title.cache.json",
     screenshotHashes: "%APPDATA%/SteamVault/screenshot.hashes.json",
     entraClientId: "1cb15360-f199-4b94-94de-557b82824079",
