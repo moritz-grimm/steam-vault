@@ -60,6 +60,7 @@ export async function handleDirectoryPathInput(ctx: Pick<AppContext, "configServ
  * @returns The new directory path
  */
 export async function printDirectoryPathPrompt(): Promise<string | null> {
+    // TODO: add validation that the entered path is really a steam path & instructions on how the path has to look like
     const userInput = await input({
         message: "Enter a valid path to your steam screenshot directory. Type exit to return:",
         required: true,
