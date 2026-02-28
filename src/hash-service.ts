@@ -46,9 +46,9 @@ export class HashService {
      *
      * @param screenshotHash Hash of the screenshot to be uploaded
      * @param gameId Id of the game corresponding to the screenshot
-     * @param screenshotFileName Filename of the screenshot to be uploaded
+     * @param filename Filename of the screenshot to be uploaded
      */
-    hashExists(screenshotHash: string, gameId: string, screenshotFileName: string): boolean {
+    public exists(screenshotHash: string, gameId: string, filename: string): boolean {
         let hashes: GameHashes = {};
 
         if (fs.existsSync(this.config.screenshotHashes)) {
@@ -76,12 +76,16 @@ export class HashService {
         }
 
         this.logger.info("Screenshot not found. Writing to json");
-        hashes[gameId][screenshotFileName] = screenshotHash;
+        hashes[gameId][filename] = screenshotHash;
 
         // TODO: If a upload fails. The hash is still written to the json. Fix this
         writeToJson(this.config.screenshotHashes, hashes);
 
         return false;
+    }
+
+    public add(gameId: string, filename: string, screenshotHash: string): void {
+        
     }
 
     compareRemoteAndLocaleHashJson(): void {

@@ -17,7 +17,7 @@ export class OneDriveService {
         return this.configService.get();
     }
 
-    async uploadFile(remotePath: string, localPath: string, contentType: string): Promise<void> {
+    private async uploadFile(remotePath: string, localPath: string, contentType: string): Promise<void> {
         const token = await this.authService.getToken();
         const fileBuffer = await readFile(localPath);
 
@@ -40,14 +40,14 @@ export class OneDriveService {
      * Orchestrating screenshot upload
      * @param gameId - Id of the game
      * @param gameTitle - Title of the game
-     * @param filePath - Path to the screenshot
+     * @param filename - Filename of the screenshot
      */
-    public async uploadScreenshot(gameId: string, gameTitle: string, filePath: string) {
-        const localPath = `${this.config.screenshotFolderPath}/${gameId}/screenshots/${screenshot}`;
-        const backupPath = `${this.config.backupPath}/${screenshot}`;
+    public async uploadScreenshot(gameId: string, gameTitle: string, filename: string): Promise<void> {
+        const localPath = `${this.config.screenshotFolderPath}/${gameId}/screenshots/${filename}`;
+        const backupPath = `${this.config.backupPath}/${filename}`;
 
         const sanitizedGameTitle = sanitizeGameTitle(gameTitle);
-        const remotePath = `https://graph.microsoft.com/v1.0/me/drive/special/photos:/SteamVault/${sanitizedGameTitle}/${screenshot}:/content`; //TODO Make this path configurable by the user
+        const remotePath = `https://graph.microsoft.com/v1.0/me/drive/special/photos:/SteamVault/${sanitizedGameTitle}/${filename}:/content`; //TODO Make this path configurable by the user
 
         this.logger.info(`Creating screenshot backup for : ${localPath}`);
 
@@ -57,12 +57,15 @@ export class OneDriveService {
 
         this.logger.info("Uploading screenshot");
         await this.uploadFile(remotePath, localPath, "image/jpeg");
-        this.logger.info(`Screenshot uploaded: ${screenshot}`);
-
-
+        this.logger.info(`Screenshot uploaded: ${filename}`);
     }
 
-    public async uploadHashJson() {
+    public async uploadHashJson(): Promise<void> {
+        const localPath = this.config.screenshotHashes;
+        const remotePath = "https://graph.microsoft.com/v1.0/me/drive/special/photos:/SteamVault/screenshot-hashes.json:/content";
 
+        this.logger.info("Uploading screenshot hash json");
+        await this.uploadFile(remotePath, localPath, "application/json");
+        this.logger.info("Upload of screenshot hash json successful");
     }
 }

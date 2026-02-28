@@ -2,7 +2,7 @@ import { exiftool } from "exiftool-vendored";
 import { copyFile, stat, unlink } from "node:fs/promises";
 import { toError } from "src/utils/error-utils";
 
-export async function writeExifMetadata(filePath: string, backupPath: string) {
+export async function writeExifMetadata(filePath: string, backupPath: string): Promise<void> {
     try {
         await copyFile(filePath, backupPath);
 
