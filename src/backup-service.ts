@@ -33,7 +33,7 @@ export class BackupService {
         const gameScreenshots: PromiseSettledResult<GameScreenshots>[] = await Promise.allSettled(
             gameIds.map(async(id) => {
                 const gameTitle = await this.steamApiService.getGameTitle(id) ?? "";
-                const filenames = await scanForScreenshots(id);
+                const filenames = await scanForScreenshots(this.config.screenshotFolderPath, id);
 
                 return {
                     gameId: id,
