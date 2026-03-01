@@ -5,6 +5,7 @@ import { NotImplementedException } from "src/errors/not-implemented-exception";
 import { loadJsonAsync, writeToJsonAsync } from "src/utils/json-utils";
 import { Logger } from "winston";
 
+// TODO: Implement a cache
 // TODO: Add comment to file telling to not modify this file
 type GameHashes = {
     [gameId: string]: {
@@ -34,7 +35,7 @@ export class HashService {
      * @throws {Error} If the screenshot file cannot be read (e.g., does not exist or permission denied).
      */
     public async hashScreenshot(gameId: string, screenshot: string): Promise<string> {
-        const filePath = `C:/Program Files (x86)/Steam/userdata/906825544/760/remote/${gameId}/screenshots/${screenshot}`;
+        const filePath = `${this.config.screenshotFolderPath}/${gameId}/screenshots/${screenshot}`;
         const fileBuffer = await readFile(filePath);
         return crypto.createHash("sha256").update(fileBuffer).digest("hex");
     }

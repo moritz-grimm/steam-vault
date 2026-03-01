@@ -8,6 +8,7 @@ import { toError } from "src/utils/error-utils";
 import { scanForScreenshotFolders, scanForScreenshots } from "src/utils/scan-utils";
 import { Logger } from "winston";
 
+// TODO: Implement concurrent uploading
 type GameScreenshots = {
     gameId: string,
     gameTitle: string,
