@@ -2,8 +2,6 @@ import axios from "axios";
 import { readFile } from "node:fs/promises";
 import { AuthService } from "src/auth/ms-auth";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
-import { writeExifMetadata } from "src/utils/exif-utils";
-import { getScreenshotPath } from "src/utils/filepath-utils";
 import { sanitizeGameTitle } from "src/utils/string-utils";
 import { Logger } from "winston";
 
@@ -38,26 +36,17 @@ export class OneDriveService {
     }
 
     /**
-     * Orchestrating screenshot upload
-     * @param gameId - Id of the game
-     * @param gameTitle - Title of the game
+     * Uploads a screenshot to OneDrive.
+     * @param gameTitle - Title of the game (used as folder name)
      * @param filename - Filename of the screenshot
+     * @param screenshotPath - Local path to the screenshot file
      */
-    public async uploadScreenshot(gameId: string, gameTitle: string, filename: string): Promise<void> {
-        const localPath = getScreenshotPath(this.config.screenshotFolderPath, gameId, filename);
-        const backupPath = `${this.config.backupPath}/${filename}`;
-
+    public async uploadScreenshot(gameTitle: string, filename: string, screenshotPath: string): Promise<void> {
         const sanitizedGameTitle = sanitizeGameTitle(gameTitle);
         const remotePath = `https://graph.microsoft.com/v1.0/me/drive/special/photos:/SteamVault/${sanitizedGameTitle}/${filename}:/content`; //TODO Make this path configurable by the user
 
-        this.logger.info(`Creating screenshot backup for : ${localPath}`);
-
-        this.logger.info("Writing EXIF metadata");
-        await writeExifMetadata(localPath, backupPath);
-        this.logger.info("EXIF metadata written successfully");
-
         this.logger.info("Uploading screenshot");
-        await this.uploadFile(remotePath, localPath, "image/jpeg");
+        await this.uploadFile(remotePath, screenshotPath, "image/jpeg");
         this.logger.info(`Screenshot uploaded: ${filename}`);
     }
 

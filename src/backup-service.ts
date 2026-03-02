@@ -5,6 +5,8 @@ import { ConfigService, SteamVaultConfig } from "src/config-service";
 import { NotImplementedException } from "src/errors/not-implemented-exception";
 import { HashService } from "src/hash-service";
 import { toError } from "src/utils/error-utils";
+import { writeExifMetadata } from "src/utils/exif-utils";
+import { getScreenshotPath } from "src/utils/filepath-utils";
 import { scanForScreenshotFolders, scanForScreenshots } from "src/utils/scan-utils";
 import { Logger } from "winston";
 
@@ -53,7 +55,15 @@ export class BackupService {
                         try {
                             const screenshotHash = await this.hashService.hashScreenshot(gameId, filename);
                             if (!await this.hashService.exists(screenshotHash)) {
-                                await this.onedriveService.uploadScreenshot(gameId, gameTitle, filename);
+                                const screenshotPath = getScreenshotPath(this.config.screenshotFolderPath, gameId, filename);
+                                const screenshotBackupPath = `${this.config.backupPath}/${filename}`;
+
+                                this.logger.info(`Creating screenshot backup for: ${screenshotPath}`);
+                                this.logger.info("Writing EXIF metadata");
+                                await writeExifMetadata(screenshotPath, screenshotBackupPath);
+                                this.logger.info("EXIF metadata written successfully");
+
+                                await this.onedriveService.uploadScreenshot(gameTitle, filename, screenshotPath);
                                 await this.hashService.add(gameId, filename, screenshotHash);
                             }
                         } catch (err: unknown) {
