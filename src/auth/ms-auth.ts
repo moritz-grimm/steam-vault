@@ -1,6 +1,7 @@
 import * as msal from "@azure/msal-node";
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
+import { printInfo } from "src/utils/print";
 import { Logger } from "winston";
 
 const SCOPES = ["Files.ReadWrite", "User.Read"];
@@ -64,7 +65,7 @@ export class AuthService {
         const deviceCodeRequest: msal.DeviceCodeRequest = {
             scopes: SCOPES,
             deviceCodeCallback: (response) => {
-                console.log(response.message);
+                printInfo(response.message);
             },
         };
 

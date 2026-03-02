@@ -2,6 +2,7 @@ import { select } from "@inquirer/prompts";
 import { AppContext } from "src/app-context";
 import { printPartialOrFullBackupPrompt } from "src/ui/backup-menu";
 import { handleDirectoryPathInput, printSettings } from "src/ui/settings-menus/main-settings-menu";
+import { print, printInfo } from "src/utils/print";
 
 export async function printMainMenu(ctx: Pick<AppContext, "configService" | "cliOptions" | "authService" | "backupService">): Promise<void> {
     let running = true;
@@ -10,12 +11,12 @@ export async function printMainMenu(ctx: Pick<AppContext, "configService" | "cli
         if (!ctx.cliOptions.debug) console.clear();
 
         if (!ctx.configService.get().screenshotFolderPath) {
-            console.log("No screenshot path detected. Please enter one to continue");
+            printInfo("No screenshot path detected. Please enter one to continue");
 
             const pathSet = await handleDirectoryPathInput(ctx);
 
             if (!pathSet) {
-                console.log("Exiting program");
+                print("Exiting program");
                 return;
             }
         }
@@ -50,7 +51,7 @@ export async function printMainMenu(ctx: Pick<AppContext, "configService" | "cli
                 break;
             case "exit":
                 if (!ctx.cliOptions.debug) console.clear();
-                console.log("Exiting program");
+                print("Exiting program");
                 running = false;
                 break;
         }

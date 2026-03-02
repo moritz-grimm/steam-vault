@@ -7,6 +7,7 @@ import { HashService } from "src/hash-service";
 import { toError } from "src/utils/error-utils";
 import { writeExifMetadata } from "src/utils/exif-utils";
 import { getScreenshotPath } from "src/utils/filepath-utils";
+import { printSuccess } from "src/utils/print";
 import { scanForScreenshotFolders, scanForScreenshots } from "src/utils/scan-utils";
 import { Logger } from "winston";
 
@@ -77,7 +78,7 @@ export class BackupService {
         } finally {
             await this.onedriveService.uploadHashJson();
             await exiftool.end();
-            console.log("Upload successful");
+            printSuccess("Upload successful");
         }
     }
 
