@@ -78,10 +78,10 @@ export class BackupService {
                     printError(`Failed to load game data: ${toError(game.reason).message}`);
                 }
             }
+            printSuccess("Upload successful");
         } finally {
             await this.onedriveService.uploadHashJson();
             await exiftool.end();
-            printSuccess("Upload successful");
         }
     }
 
