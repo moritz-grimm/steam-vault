@@ -50,6 +50,14 @@ Full backup: scan screenshot folders → resolve game titles → hash files (SHA
 
 Interactive menus using Inquirer.js with `while(running)` state-machine loops. `console.clear()` between menu renders (disabled in `--debug` mode).
 
+For all user-facing TUI output, use the print functions from `src/utils/print.ts` instead of `console.log` directly:
+
+- `print(message)` — plain output
+- `printInfo(message)` — informational messages (cyan)
+- `printSuccess(message)` — success messages (green)
+- `printError(message)` — error messages (red)
+- `printColored(message, color)` — custom chalk color
+
 ### Config & Environment
 
 - Config file: `%APPDATA%/SteamVault/steamvault.config.json` (managed by `ConfigService` in `src/config-service.ts`)
