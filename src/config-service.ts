@@ -1,6 +1,5 @@
-import fs from "node:fs/promises";
 import path from "node:path";
-import { loadJsonAsync } from "src/utils/json-utils";
+import { loadJsonAsync, writeToJsonAsync } from "src/utils/json-utils";
 import { toError } from "./utils/error-utils";
 
 export const configPath = path.resolve(process.env.APPDATA || "", "SteamVault/steamvault.config.json");
@@ -28,7 +27,7 @@ export class ConfigService {
             .replaceAll("%APPDATA%", process.env.APPDATA || "");
     }
 
-    private static async loadFromDisk(): Promise<SteamVaultConfig> {
+    private static async load(): Promise<SteamVaultConfig> {
         try {
             const config = await loadJsonAsync(configPath) as SteamVaultConfig;
 
@@ -47,12 +46,12 @@ export class ConfigService {
     }
 
     public static async create(): Promise<ConfigService> {
-        const config = await ConfigService.loadFromDisk();
+        const config = await ConfigService.load();
         return new ConfigService(config);
     }
 
     private async reload(): Promise<void> {
-        this.config = await ConfigService.loadFromDisk();
+        this.config = await ConfigService.load();
     }
 
     public get(): SteamVaultConfig {
@@ -63,7 +62,7 @@ export class ConfigService {
         this.config[jsonKey] = newValue;
 
         try {
-            await fs.writeFile(configPath, JSON.stringify(this.config, null, 2), "utf-8");
+            await writeToJsonAsync(configPath, this.config);
             await this.reload();
         } catch (err: unknown) {
             const error = toError(err);
