@@ -13,9 +13,6 @@ type GameHashes = {
     };
 };
 
-// ──────────────────────────────────────────────
-// HashService
-// ──────────────────────────────────────────────
 export class HashService {
     private hashes: GameHashes | null = null;
 
@@ -28,7 +25,7 @@ export class HashService {
         return this.configService.get();
     }
 
-    private async loadFromDisk(): Promise<GameHashes> {
+    private async load(): Promise<GameHashes> {
         if (this.hashes) return this.hashes;
 
         try {
@@ -63,14 +60,14 @@ export class HashService {
      * @param screenshotHash Hash of the screenshot to be checked
      */
     public async exists(screenshotHash: string): Promise<boolean> {
-        const hashes = await this.loadFromDisk();
+        const hashes = await this.load();
         return Object.values(hashes).some(game =>
             Object.values(game).includes(screenshotHash),
         );
     }
 
     public async add(gameId: string, filename: string, screenshotHash: string): Promise<void> {
-        const hashes = await this.loadFromDisk();
+        const hashes = await this.load();
 
         const alreadyExists = Object.values(hashes).some(game =>
             Object.values(game).includes(screenshotHash),
