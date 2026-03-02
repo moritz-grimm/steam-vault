@@ -1,5 +1,5 @@
-import fs from "node:fs/promises";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
+import { loadJsonAsync, writeToJsonAsync } from "src/utils/json-utils";
 import { Logger } from "winston";
 
 type GameTitleMap = Record<string, string>;
@@ -20,8 +20,7 @@ export class GameTitleCache {
         if (this.entries) return this.entries;
 
         try {
-            const data = await fs.readFile(this.config.gameTitleCache, "utf-8");
-            this.entries = JSON.parse(data) as GameTitleMap;
+            this.entries = await loadJsonAsync(this.config.gameTitleCache) as GameTitleMap;
             this.logger.info("Successfully loaded game title cache from disk");
             return this.entries;
         } catch {
@@ -44,7 +43,7 @@ export class GameTitleCache {
         const entries = await this.loadFromDisk();
         entries[appId] = gameTitle;
 
-        await fs.writeFile(this.config.gameTitleCache, JSON.stringify(entries, null, 2), "utf-8");
+        await writeToJsonAsync(this.config.gameTitleCache, JSON.stringify(entries, null, 2));
         this.logger.info("Successfully wrote new game title to disk");
         this.entries = entries;
     }
