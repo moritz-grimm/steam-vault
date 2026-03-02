@@ -7,7 +7,7 @@ import { HashService } from "src/hash-service";
 import { toError } from "src/utils/error-utils";
 import { writeExifMetadata } from "src/utils/exif-utils";
 import { getScreenshotPath } from "src/utils/filepath-utils";
-import { printSuccess } from "src/utils/print";
+import { printError, printSuccess } from "src/utils/print";
 import { scanForScreenshotFolders, scanForScreenshots } from "src/utils/scan-utils";
 import { Logger } from "winston";
 
@@ -68,11 +68,14 @@ export class BackupService {
                                 await this.hashService.add(gameId, filename, screenshotHash);
                             }
                         } catch (err: unknown) {
-                            this.logger.error(`Failed to upload file: ${filename}`, toError(err));
+                            const error = toError(err);
+                            this.logger.error(`Failed to upload file: ${filename}`, error);
+                            printError(`Failed to upload file: ${filename} - ${error.message}`);
                         }
                     }
                 } else {
                     this.logger.error(`Failed to load data`, game.reason);
+                    printError(`Failed to load game data: ${toError(game.reason).message}`);
                 }
             }
         } finally {
@@ -82,6 +85,8 @@ export class BackupService {
         }
     }
 
+    // Ignore because it's not implemented yet
+    // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-unused-vars
     public async runPartial(iDs: Array<string>): Promise<void> {
         throw new NotImplementedException;
     }

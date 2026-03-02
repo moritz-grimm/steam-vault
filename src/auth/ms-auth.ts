@@ -2,8 +2,7 @@ import * as msal from "@azure/msal-node";
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
-import { toError } from "src/utils/error-utils";
-import { printError, printInfo } from "src/utils/print";
+import { printInfo } from "src/utils/print";
 import { Logger } from "winston";
 
 const SCOPES = ["Files.ReadWrite", "User.Read"];
@@ -51,7 +50,7 @@ export class AuthService {
         return new msal.PublicClientApplication(this.getMsalConfig());
     }
 
-    public async login(): Promise<msal.AuthenticationResult | null | undefined> {
+    public async login(): Promise<msal.AuthenticationResult | null> {
         const pca = this.createClient();
         const accounts = await pca.getTokenCache().getAllAccounts();
 
@@ -70,13 +69,9 @@ export class AuthService {
             },
         };
 
-        try {
-            const response = await pca.acquireTokenByDeviceCode(deviceCodeRequest);
-            this.logger.info("Microsoft Login successful");
-            return response;
-        } catch (error) {
-            printError(`Login failed: ${toError(error)}`);
-        }
+        const response = await pca.acquireTokenByDeviceCode(deviceCodeRequest);
+        this.logger.info("Microsoft Login successful");
+        return response;
     }
 
     public async logout(): Promise<void> {

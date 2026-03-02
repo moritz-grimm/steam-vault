@@ -29,9 +29,8 @@ export class OneDriveService {
             });
         } catch (err: unknown) {
             const status = axios.isAxiosError(err) ? err.response?.status : "unknown";
-            const detail = axios.isAxiosError(err) ? err.response?.data : err;
-            this.logger.error(`Upload failed [${status}] for ${localPath}:`, detail);
-            throw new Error(`Upload failed (${status}): ${localPath}`);
+            const detail = axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : String(err);
+            throw new Error(`Upload failed [${status}] for ${localPath}: ${detail}`);
         }
     }
 

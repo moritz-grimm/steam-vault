@@ -23,9 +23,13 @@ export class GameTitleCache {
             this.entries = await loadJsonAsync(this.config.gameTitleCache) as GameTitleMap;
             this.logger.info("Successfully loaded game title cache from disk");
             return this.entries;
-        } catch {
-            this.entries = {};
-            return this.entries;
+        } catch (err) {
+            if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+                this.logger.info("Game title cache not found on disk (first run). Starting with empty cache");
+                this.entries = {};
+                return this.entries;
+            }
+            throw err;
         }
     }
 

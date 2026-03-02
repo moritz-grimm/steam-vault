@@ -1,5 +1,7 @@
 import { select } from "@inquirer/prompts";
 import { AppContext } from "src/app-context";
+import { toError } from "src/utils/error-utils";
+import { printError, printInfo } from "src/utils/print";
 
 export async function printAuthSettings(ctx: Pick<AppContext, "cliOptions" | "authService">): Promise<void> {
     if (!ctx.cliOptions.debug) console.clear();
@@ -36,7 +38,12 @@ export async function printAuthSettings(ctx: Pick<AppContext, "cliOptions" | "au
 
     switch (answer) {
         case "login":
-            await ctx.authService.login();
+            try {
+                await ctx.authService.login();
+                printInfo("Login successful");
+            } catch (err: unknown) {
+                printError(`Login failed: ${toError(err).message}`);
+            }
             break;
         case "logout":
             await ctx.authService.logout();
