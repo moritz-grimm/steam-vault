@@ -1,7 +1,8 @@
 import * as msal from "@azure/msal-node";
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
-import { printInfo } from "src/utils/print";
+import { toError } from "src/utils/error-utils";
+import { printError, printInfo } from "src/utils/print";
 import { Logger } from "winston";
 
 const SCOPES = ["Files.ReadWrite", "User.Read"];
@@ -74,7 +75,7 @@ export class AuthService {
             this.logger.info("Microsoft Login successful");
             return response;
         } catch (error) {
-            console.error("Login failed:", error);
+            printError(`Login failed: ${toError(error)}`);
         }
     }
 

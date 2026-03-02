@@ -1,6 +1,7 @@
 import axios from "axios";
 import { GameTitleCache } from "src/api/game-title-cache";
 import { toError } from "src/utils/error-utils";
+import { printError } from "src/utils/print";
 import { Logger } from "winston";
 
 type SteamApiResponse = {
@@ -30,7 +31,7 @@ export class SteamApiService {
 
             if (!gameTitle) {
                 this.logger.error(`No data found for appId: ${appId}`);
-                console.error(`No data found for appId: ${appId}`);
+                printError(`No data found for appId: ${appId}`);
                 return undefined;
             }
 
@@ -38,7 +39,7 @@ export class SteamApiService {
             return gameTitle;
         } catch (err: unknown) {
             const error = toError(err);
-            console.error("Error while fetching game title:", error.message);
+            printError(`Error while fetching game title: ${error.message}`);
             this.logger.error("Error while fetching game title:", error.message);
             return undefined;
         }
