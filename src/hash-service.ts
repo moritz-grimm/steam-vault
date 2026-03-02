@@ -1,11 +1,11 @@
-import { readFile } from "node:fs/promises";
 import crypto from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
 import { NotImplementedException } from "src/errors/not-implemented-exception";
+import { toError } from "src/utils/error-utils";
 import { loadJsonAsync, writeToJsonAsync } from "src/utils/json-utils";
 import { Logger } from "winston";
 
-// TODO: Implement a cache
 // TODO: Add comment to file telling to not modify this file
 type GameHashes = {
     [gameId: string]: {
@@ -17,6 +17,8 @@ type GameHashes = {
 // HashService
 // ──────────────────────────────────────────────
 export class HashService {
+    private hashes: GameHashes | null = null;
+
     public constructor(
         private readonly configService: ConfigService,
         private readonly logger: Logger,
@@ -24,6 +26,21 @@ export class HashService {
 
     private get config(): SteamVaultConfig {
         return this.configService.get();
+    }
+
+    private async loadFromDisk(): Promise<GameHashes> {
+        if (this.hashes) return this.hashes;
+
+        try {
+            this.hashes = await loadJsonAsync(this.config.screenshotHashes) as GameHashes;
+            return this.hashes;
+        } catch (err: unknown) {
+            if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
+                throw new Error(`Could not load screenshot.hashes.json: ${toError(err).message}`);
+            }
+            this.hashes = {};
+            return this.hashes;
+        }
     }
 
     /**
@@ -46,33 +63,15 @@ export class HashService {
      * @param screenshotHash Hash of the screenshot to be checked
      */
     public async exists(screenshotHash: string): Promise<boolean> {
-        let hashes: GameHashes = {};
-
-        try {
-            hashes = await loadJsonAsync(this.config.screenshotHashes) as GameHashes;
-        } catch (err) {
-            if ((err as NodeJS.ErrnoException).code !== "ENOENT") { // To prevent error logging on first start if there are no entries yet
-                this.logger.error("Error loading screenshot-hashes.json", err);
-            }
-        }
-
+        const hashes = await this.loadFromDisk();
         return Object.values(hashes).some(game =>
             Object.values(game).includes(screenshotHash),
         );
     }
 
     public async add(gameId: string, filename: string, screenshotHash: string): Promise<void> {
-        let hashes: GameHashes = {};
+        const hashes = await this.loadFromDisk();
 
-        try {
-            hashes = await loadJsonAsync(this.config.screenshotHashes) as GameHashes;
-        } catch (err) {
-            if ((err as NodeJS.ErrnoException).code !== "ENOENT") { // To prevent error logging on first start if there are no entries yet
-                this.logger.error("Error loading screenshot-hashes.json", err);
-            }
-        }
-
-        // Check already loaded file to avoid loading same file twice via .exists
         const alreadyExists = Object.values(hashes).some(game =>
             Object.values(game).includes(screenshotHash),
         );
@@ -85,6 +84,8 @@ export class HashService {
         hashes[gameId][filename] = screenshotHash;
 
         await writeToJsonAsync(this.config.screenshotHashes, hashes);
+        this.hashes = hashes;
+        this.logger.info("Successfully wrote new screenshot hash to disk");
     }
 
     compareRemoteAndLocaleHashJson(): void {
