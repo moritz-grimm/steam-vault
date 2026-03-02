@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
 import { NotImplementedException } from "src/errors/not-implemented-exception";
 import { toError } from "src/utils/error-utils";
+import { getScreenshotPath } from "src/utils/filepath-utils";
 import { loadJsonAsync, writeToJsonAsync } from "src/utils/json-utils";
 import { Logger } from "winston";
 
@@ -43,13 +44,13 @@ export class HashService {
     /**
      * Hashes a screenshot file using SHA-256 for comparison if the screenshot was already uploaded
      * @param {string} gameId - The Steam game ID corresponding to the game.
-     * @param {string} screenshot - The filename of the screenshot to hash.
+     * @param {string} filename - The filename of the screenshot to hash.
      * @returns {string} The SHA-256 hash of the screenshot as as hexadecimal string.
      *
      * @throws {Error} If the screenshot file cannot be read (e.g., does not exist or permission denied).
      */
-    public async hashScreenshot(gameId: string, screenshot: string): Promise<string> {
-        const filePath = `${this.config.screenshotFolderPath}/${gameId}/screenshots/${screenshot}`;
+    public async hashScreenshot(gameId: string, filename: string): Promise<string> {
+        const filePath = getScreenshotPath(this.config.screenshotFolderPath, gameId, filename);
         const fileBuffer = await readFile(filePath);
         return crypto.createHash("sha256").update(fileBuffer).digest("hex");
     }

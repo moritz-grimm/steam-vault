@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { AuthService } from "src/auth/ms-auth";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
 import { writeExifMetadata } from "src/utils/exif-utils";
+import { getScreenshotPath } from "src/utils/filepath-utils";
 import { sanitizeGameTitle } from "src/utils/string-utils";
 import { Logger } from "winston";
 
@@ -43,7 +44,7 @@ export class OneDriveService {
      * @param filename - Filename of the screenshot
      */
     public async uploadScreenshot(gameId: string, gameTitle: string, filename: string): Promise<void> {
-        const localPath = `${this.config.screenshotFolderPath}/${gameId}/screenshots/${filename}`;
+        const localPath = getScreenshotPath(this.config.screenshotFolderPath, gameId, filename);
         const backupPath = `${this.config.backupPath}/${filename}`;
 
         const sanitizedGameTitle = sanitizeGameTitle(gameTitle);

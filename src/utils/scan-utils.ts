@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { getScreenshotFolder } from "src/utils/filepath-utils";
 
 /**
  * Scans a given parent Steam screenshot folder and returns the names of all immediate subfolders.
@@ -23,7 +24,7 @@ export async function scanForScreenshotFolders(folderpath: string): Promise<Arra
 };
 
 export async function scanForScreenshots(basePath: string, gameId: string): Promise<Array<string>> {
-    const folderPath = `${basePath}/${gameId}/screenshots`;
+    const folderPath = getScreenshotFolder(basePath, gameId);
 
     const files = await fs.readdir(folderPath);
     return files.filter(file => /\.(png|jpg|jpeg)$/i.test(file));

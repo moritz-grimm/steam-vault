@@ -37,3 +37,26 @@ export function isValidDirectory(directoryPath: string): string | true {
         return "Path does not exist";
     }
 }
+
+/**
+ * Returns the path to the screenshots folder for a given game.
+ *
+ * @param basePath - Root Steam screenshot directory (e.g. `config.screenshotFolderPath`)
+ * @param gameId - Steam game ID
+ * @returns Absolute path to the game's screenshots folder
+ */
+export function getScreenshotFolder(basePath: string, gameId: string): string {
+    return `${basePath}/${gameId}/screenshots`;
+}
+
+/**
+ * Returns the full path to a specific screenshot file.
+ *
+ * @param basePath - Root Steam screenshot directory (e.g. `config.screenshotFolderPath`)
+ * @param gameId - Steam game ID
+ * @param filename - Screenshot filename including extension (e.g. `"20240101120000_1.jpg"`)
+ * @returns Absolute path to the screenshot file
+ */
+export function getScreenshotPath(basePath: string, gameId: string, filename: string): string {
+    return `${getScreenshotFolder(basePath, gameId)}/${filename}`;
+}
