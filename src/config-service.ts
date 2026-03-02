@@ -15,29 +15,6 @@ export type SteamVaultConfig = {
     backupPath: string,
 };
 
-function resolveConfigPlaceholders(configString: string): string {
-    return configString
-        .replaceAll("%APPDATA%", process.env.APPDATA || "");
-}
-
-async function loadFromDisk(): Promise<SteamVaultConfig> {
-    try {
-        const config = await loadJsonAsync(configPath) as SteamVaultConfig;
-
-        for (const key of Object.keys(config) as (keyof SteamVaultConfig)[]) {
-            const value = config[key];
-            if (typeof value === "string") {
-                config[key] = resolveConfigPlaceholders(value);
-            }
-        }
-
-        return config;
-    } catch (err: unknown) {
-        const error = toError(err);
-        throw new Error(`Could not load steamvault-config.json: ${error.message}`);
-    }
-}
-
 // This needs to be passed around as the service and not just a snapshot of the config file to ensure configFile is always up to date
 export class ConfigService {
     private config: SteamVaultConfig;
@@ -46,17 +23,40 @@ export class ConfigService {
         this.config = config;
     }
 
+    private static resolveConfigPlaceholders(configString: string): string {
+        return configString
+            .replaceAll("%APPDATA%", process.env.APPDATA || "");
+    }
+
+    private static async loadFromDisk(): Promise<SteamVaultConfig> {
+        try {
+            const config = await loadJsonAsync(configPath) as SteamVaultConfig;
+
+            for (const key of Object.keys(config) as (keyof SteamVaultConfig)[]) {
+                const value = config[key];
+                if (typeof value === "string") {
+                    config[key] = ConfigService.resolveConfigPlaceholders(value);
+                }
+            }
+
+            return config;
+        } catch (err: unknown) {
+            const error = toError(err);
+            throw new Error(`Could not load steamvault.config.json: ${error.message}`);
+        }
+    }
+
     public static async create(): Promise<ConfigService> {
-        const config = await loadFromDisk();
+        const config = await ConfigService.loadFromDisk();
         return new ConfigService(config);
+    }
+
+    private async reload(): Promise<void> {
+        this.config = await ConfigService.loadFromDisk();
     }
 
     public get(): SteamVaultConfig {
         return this.config;
-    }
-
-    private async reload(): Promise<void> {
-        this.config = await loadFromDisk();
     }
 
     public async write(jsonKey: keyof SteamVaultConfig, newValue: string): Promise<void> {
