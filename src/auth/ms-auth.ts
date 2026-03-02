@@ -1,5 +1,6 @@
 import * as msal from "@azure/msal-node";
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { readFile, writeFile } from "node:fs/promises";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
 import { toError } from "src/utils/error-utils";
 import { printError, printInfo } from "src/utils/print";
@@ -28,18 +29,17 @@ export class AuthService {
             },
             cache: {
                 cachePlugin: {
-                    // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/explicit-function-return-type
-                    beforeCacheAccess: async (cacheContext: msal.TokenCacheContext) => {
-                        const msalCache = this.config.msalCache;
-                        if (existsSync(msalCache)) {
-                            const cacheData = readFileSync(msalCache, "utf-8");
+                    beforeCacheAccess: async(cacheContext: msal.TokenCacheContext): Promise<void> => {
+                        try {
+                            const cacheData = await readFile(this.config.msalCache, "utf-8");
                             cacheContext.tokenCache.deserialize(cacheData);
+                        } catch (err) {
+                            if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
                         }
                     },
-                    // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/explicit-function-return-type
-                    afterCacheAccess: async (cacheContext: msal.TokenCacheContext) => {
+                    afterCacheAccess: async(cacheContext: msal.TokenCacheContext): Promise<void> => {
                         if (cacheContext.cacheHasChanged) {
-                            writeFileSync(this.config.msalCache, cacheContext.tokenCache.serialize());
+                            await writeFile(this.config.msalCache, cacheContext.tokenCache.serialize());
                         }
                     },
                 },
