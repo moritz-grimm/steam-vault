@@ -24,15 +24,6 @@
         "sort-package-json": "npx sort-package-json",
         "typecheck": "npx tsc --noEmit 2>&1"
     },
-    "lint-staged": {
-        "*.{ts,js}": [
-            "npm run lint:fix",
-            "npm run typecheck"
-        ],
-        "package.json": [
-            "npm run sort-package-json"
-        ]
-    },
     "dependencies": {
         "@azure/msal-node": "^3.8.2",
         "@dotenvx/dotenvx": "^1.51.1",
