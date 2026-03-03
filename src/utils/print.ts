@@ -1,4 +1,4 @@
-import chalk, { ForegroundColor, BackgroundColor } from "chalk";
+import chalk, { ForegroundColorName, BackgroundColorName } from "chalk";
 
 
 export function print(message: string): void {
@@ -17,6 +17,6 @@ export function printError(message: string): void {
     console.log(chalk.red(message));
 }
 
-export function printColored(message: string, color: typeof ForegroundColor | typeof BackgroundColor): void {
+export function printColored(message: string, color: ForegroundColorName | BackgroundColorName): void {
     console.log(chalk[color](message));
 }
