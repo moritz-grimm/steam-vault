@@ -7,9 +7,6 @@ import { Logger } from "winston";
 
 const SCOPES = ["Files.ReadWrite", "User.Read"];
 
-// ──────────────────────────────────────────────
-// AuthService
-// ──────────────────────────────────────────────
 export class AuthService {
     constructor(
         private readonly configService: ConfigService,
@@ -50,7 +47,7 @@ export class AuthService {
         return new msal.PublicClientApplication(this.getMsalConfig());
     }
 
-    public async login(): Promise<msal.AuthenticationResult | null> {
+    public async login(): Promise<msal.AuthenticationResult> {
         const pca = this.createClient();
         const accounts = await pca.getTokenCache().getAllAccounts();
 
@@ -70,6 +67,11 @@ export class AuthService {
         };
 
         const response = await pca.acquireTokenByDeviceCode(deviceCodeRequest);
+
+        if (!response) {
+            throw new Error("Microsoft login failed. Please check your internet connection and try again");
+        }
+
         this.logger.info("Microsoft Login successful");
         return response;
     }
