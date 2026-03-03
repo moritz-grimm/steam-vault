@@ -3,6 +3,6 @@ export function sanitizeGameTitle(gameTitle: string): string {
         .replaceAll(":", " -") // Colon
         .replaceAll("/", " ") // Slash
         .replaceAll(/[\\*?"<>|]/g, "") // Everything else
-        .replaceAll(/\s+g/g, " ") // Combine mutliple whitespaces
+        .replaceAll(/\s+/g, " ") // Combine multiple whitespaces
         .trim();
 }
