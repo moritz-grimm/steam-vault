@@ -1,5 +1,5 @@
 import * as msal from "@azure/msal-node";
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, unlinkSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
 import { printInfo } from "src/utils/print";
