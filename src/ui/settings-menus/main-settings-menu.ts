@@ -14,7 +14,7 @@ export async function printSettings(ctx: Pick<AppContext, "configService" | "cli
             message: "Choose a setting",
             choices: [
                 {
-                    name: "Folderpath",
+                    name: "Screenshot Folder Path",
                     value: "folderpath",
                     description: `Current folderpath: '${ctx.configService.get().screenshotFolderPath}'`,
                 },
