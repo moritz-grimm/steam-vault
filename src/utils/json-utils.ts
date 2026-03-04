@@ -9,8 +9,8 @@ export async function writeToJsonAsync(filePath: string, content: unknown): Prom
     await writeFile(filePath, JSON.stringify(content, null, 4), "utf-8");
 }
 
-export function loadJson(filepath: string): unknown {
-    const data = readFileSync(filepath, "utf-8");
+export function loadJson(filePath: string): unknown {
+    const data = readFileSync(filePath, "utf-8");
 
     if (data.trim() === "") {
         return {};
@@ -19,8 +19,8 @@ export function loadJson(filepath: string): unknown {
     return JSON.parse(data) as unknown;
 }
 
-export async function loadJsonAsync(filepath: string): Promise<unknown> {
-    const data = await readFile(filepath, "utf-8");
+export async function loadJsonAsync(filePath: string): Promise<unknown> {
+    const data = await readFile(filePath, "utf-8");
 
     if (data.trim() === "") {
         return {};

@@ -16,13 +16,15 @@ const appDataFolder = path.resolve(process.env.APPDATA || "", "SteamVault");
 const backupPath = path.resolve(appDataFolder, "backup");
 
 const defaultConfig: SteamVaultConfig = {
-    screenshotFolderPath: "",
+    screenshotDirectory: "",
     gameTitleCache: "%APPDATA%/SteamVault/game-title.cache.json",
     screenshotHashes: "%APPDATA%/SteamVault/screenshot.hashes.json",
     entraClientId: "1cb15360-f199-4b94-94de-557b82824079",
     msalCache: "%APPDATA%/SteamVault/msal.cache.json",
     logDirPath: "%APPDATA%/SteamVault/logs",
     backupPath: "%APPDATA%/SteamVault/backup",
+    oneDriveRootPath: "special/photos",
+    oneDriveBaseFolder: "SteamVault",
 };
 
 /**

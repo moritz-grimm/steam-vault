@@ -50,7 +50,7 @@ export class HashService {
      * @throws {Error} If the screenshot file cannot be read (e.g., does not exist or permission denied).
      */
     public async hashScreenshot(gameId: string, filename: string): Promise<string> {
-        const filePath = getScreenshotPath(this.config.screenshotFolderPath, gameId, filename);
+        const filePath = getScreenshotPath(this.config.screenshotDirectory, gameId, filename);
         const fileBuffer = await readFile(filePath);
         return crypto.createHash("sha256").update(fileBuffer).digest("hex");
     }

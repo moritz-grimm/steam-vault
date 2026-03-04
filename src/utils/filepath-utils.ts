@@ -2,6 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+type ValidationResult =
+    | { valid: true }
+    | { valid: false; reason: string };
+
 /**
  * Returns the absolute path of the directory in which the current module file is located.
  *
@@ -27,21 +31,35 @@ export function getDirname(): string {
  * @param directoryPath A absolute or relative directory path
  * @returns true if valid, error message otherwise
  */
-export function isValidDirectory(directoryPath: string): string | true {
+export function isValidDirectory(directoryPath: string): ValidationResult {
     try {
         const cleanedPath = path.normalize(directoryPath.trim());
         const absolutePath = path.resolve(cleanedPath);
 
-        return fs.statSync(absolutePath).isDirectory() || "The path must be a directory";
+        if (fs.statSync(absolutePath).isDirectory()) {
+            return { valid: true };
+        }
+
+        return { valid: false, reason: "Path is not a directory" };
     } catch {
-        return "Path does not exist";
+        return { valid: false, reason: "Path does not exist" };
     }
+}
+
+export function isValidOneDriveFolderName(name: string): ValidationResult {
+    if (!name) return { valid: false, reason: "Name cannot be empty" };
+    if (name.length > 400) return { valid: false, reason: "Name can only be up to 400 characters long" };
+    if (/["*:<>?/\\|]/.test(name)) return { valid: false, reason: String.raw`Name contains invalid characters: " * : < > ? / \ |` };
+    if (/^(\.lock|CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i.test(name)) return { valid: false, reason: "Name is a reserved system name" };
+    if (/^[~$.]/.test(name)) return { valid: false, reason: "Name cannot begin with ~, $ or ." };
+    if (/[. ]$/.test(name)) return { valid: false, reason: "Name cannot end with a period or space" };
+    return { valid: true };
 }
 
 /**
  * Returns the path to the screenshots folder for a given game.
  *
- * @param basePath - Root Steam screenshot directory (e.g. `config.screenshotFolderPath`)
+ * @param basePath - Root Steam screenshot directory (e.g. `config.screenshotDirectory`)
  * @param gameId - Steam game ID
  * @returns Absolute path to the game's screenshots folder
  */
@@ -52,7 +70,7 @@ export function getScreenshotFolder(basePath: string, gameId: string): string {
 /**
  * Returns the full path to a specific screenshot file.
  *
- * @param basePath - Root Steam screenshot directory (e.g. `config.screenshotFolderPath`)
+ * @param basePath - Root Steam screenshot directory (e.g. `config.screenshotDirectory`)
  * @param gameId - Steam game ID
  * @param filename - Screenshot filename including extension (e.g. `"20240101120000_1.jpg"`)
  * @returns Absolute path to the screenshot file

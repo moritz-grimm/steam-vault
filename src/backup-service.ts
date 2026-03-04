@@ -32,12 +32,12 @@ export class BackupService {
     }
 
     public async runFull(): Promise<void> {
-        const gameIds = await scanForScreenshotFolders(this.config.screenshotFolderPath);
+        const gameIds = await scanForScreenshotFolders(this.config.screenshotDirectory);
 
         const gameScreenshots: PromiseSettledResult<GameScreenshots>[] = await Promise.allSettled(
             gameIds.map(async(id) => {
                 const gameTitle = await this.steamApiService.getGameTitle(id) ?? "";
-                const filenames = await scanForScreenshots(this.config.screenshotFolderPath, id);
+                const filenames = await scanForScreenshots(this.config.screenshotDirectory, id);
 
                 return {
                     gameId: id,
@@ -56,7 +56,7 @@ export class BackupService {
                         try {
                             const screenshotHash = await this.hashService.hashScreenshot(gameId, filename);
                             if (!await this.hashService.exists(screenshotHash)) {
-                                const screenshotPath = getScreenshotPath(this.config.screenshotFolderPath, gameId, filename);
+                                const screenshotPath = getScreenshotPath(this.config.screenshotDirectory, gameId, filename);
                                 const screenshotBackupPath = `${this.config.backupPath}/${filename}`;
 
                                 this.logger.info(`Creating screenshot backup for: ${screenshotPath}`);

@@ -6,8 +6,8 @@ import { getScreenshotFolder } from "src/utils/filepath-utils";
  * Scans a given parent Steam screenshot folder and returns the names of all immediate subfolders.
  * Each subfolder typically corresponds to a specific game.
  *
- * @param {string} folderpath - Absolute or relative path to the Steam parent screenshot folder.
- * @returns {Promise<string[]>} A promise that resolves to an array of folder names (strings) found inside the parent folder.
+ * @param {string} directory - Absolute path to the Steam parent screenshot directory.
+ * @returns {Promise<string[]>} A promise that resolves to an array of folder names (strings) found inside the parent directory.
  *
  * @throws {Error} Throws an error if the folder does not exist or is not accessible.
  *
@@ -15,17 +15,17 @@ import { getScreenshotFolder } from "src/utils/filepath-utils";
  * const folders = await scanForScreenshotFolders("C:/Users/Username/Documents/SteamScreenshots");
  * console.log(folders); // ["Game1", "Game2", "Game3"]
  */
-export async function scanForScreenshotFolders(folderpath: string): Promise<Array<string>> {
-    if (!path.isAbsolute(folderpath)) {
+export async function scanForScreenshotFolders(directory: string): Promise<Array<string>> {
+    if (!path.isAbsolute(directory)) {
         throw new Error("Path must be absolute");
     }
-    const entries = await fs.readdir(folderpath, { withFileTypes: true });
+    const entries = await fs.readdir(directory, { withFileTypes: true });
     return entries.filter(entry => entry.isDirectory()).map(entry => entry.name);
 };
 
 export async function scanForScreenshots(basePath: string, gameId: string): Promise<Array<string>> {
-    const folderPath = getScreenshotFolder(basePath, gameId);
+    const directory = getScreenshotFolder(basePath, gameId);
 
-    const files = await fs.readdir(folderPath);
+    const files = await fs.readdir(directory);
     return files.filter(file => /\.(png|jpg|jpeg)$/i.test(file));
 }

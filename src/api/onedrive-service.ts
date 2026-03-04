@@ -42,7 +42,7 @@ export class OneDriveService {
      */
     public async uploadScreenshot(gameTitle: string, filename: string, screenshotPath: string): Promise<void> {
         const sanitizedGameTitle = sanitizeGameTitle(gameTitle);
-        const remotePath = `https://graph.microsoft.com/v1.0/me/drive/special/photos:/SteamVault/${sanitizedGameTitle}/${filename}:/content`; //TODO Make this path configurable by the user
+        const remotePath = `https://graph.microsoft.com/v1.0/me/drive/${this.config.oneDriveRootPath}:/${this.config.oneDriveBaseFolder}/${sanitizedGameTitle}/${filename}:/content`;
 
         this.logger.info("Uploading screenshot");
         await this.uploadFile(remotePath, screenshotPath, "image/jpeg");
@@ -51,7 +51,7 @@ export class OneDriveService {
 
     public async uploadHashJson(): Promise<void> {
         const localPath = this.config.screenshotHashes;
-        const remotePath = "https://graph.microsoft.com/v1.0/me/drive/special/photos:/SteamVault/screenshot-hashes.json:/content";
+        const remotePath = `https://graph.microsoft.com/v1.0/me/drive/${this.config.oneDriveRootPath}:/${this.config.oneDriveBaseFolder}/screenshot.hashes.json:/content`;
 
         this.logger.info("Uploading screenshot hash json");
         await this.uploadFile(remotePath, localPath, "application/json");

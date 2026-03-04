@@ -5,13 +5,15 @@ import { toError } from "./utils/error-utils";
 export const configPath = path.resolve(process.env.APPDATA || "", "SteamVault/steamvault.config.json");
 
 export type SteamVaultConfig = {
-    screenshotFolderPath: string,
+    screenshotDirectory: string,
     gameTitleCache: string,
     screenshotHashes: string,
     entraClientId: string,
     msalCache: string,
     logDirPath: string,
     backupPath: string,
+    oneDriveRootPath: string,
+    oneDriveBaseFolder: string,
 };
 
 // This needs to be passed around as the service and not just a snapshot of the config file to ensure configFile is always up to date

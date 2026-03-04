@@ -1,7 +1,8 @@
 import { input, select } from "@inquirer/prompts";
-import path from "node:path";
 import { AppContext } from "src/app-context";
 import { printAuthSettings } from "src/ui/settings-menus/auth-settings-menu";
+import { printOneDriveSettings } from "src/ui/settings-menus/onedrive-settings-menu";
+import { handleScreenshotDirectoryPathChange } from "src/ui/settings-menus/settings-handlers";
 import { isValidDirectory } from "src/utils/filepath-utils";
 
 export async function printSettings(ctx: Pick<AppContext, "configService" | "cliOptions" | "authService">): Promise<void> {
@@ -14,9 +15,14 @@ export async function printSettings(ctx: Pick<AppContext, "configService" | "cli
             message: "Choose a setting",
             choices: [
                 {
-                    name: "Screenshot Folder Path",
-                    value: "folderpath",
-                    description: `Current folderpath: '${ctx.configService.get().screenshotFolderPath}'`,
+                    name: "Screenshot Directory",
+                    value: "screenshotDirectory",
+                    description: `Current directory: '${ctx.configService.get().screenshotDirectory}'`,
+                },
+                {
+                    name: "OneDrive Settings",
+                    value: "oneDriveSettings",
+                    description: "Configure the OneDrive upload destination",
                 },
                 {
                     name: "Auth Setting",
@@ -33,8 +39,11 @@ export async function printSettings(ctx: Pick<AppContext, "configService" | "cli
         });
 
         switch (answer) {
-            case "folderpath":
-                await handleDirectoryPathInput(ctx);
+            case "screenshotDirectory":
+                await printScreenshotDirectoryPrompt(ctx);
+                break;
+            case "oneDriveSettings":
+                await printOneDriveSettings(ctx);
                 break;
             case "authSettings":
                 await printAuthSettings(ctx);
@@ -46,32 +55,24 @@ export async function printSettings(ctx: Pick<AppContext, "configService" | "cli
     }
 }
 
-export async function handleDirectoryPathInput(ctx: Pick<AppContext, "configService">): Promise<boolean> {
-    const dirPath = await printDirectoryPathPrompt();
-    if (!dirPath) {
-        return false;
-    }
-    await ctx.configService.write("screenshotFolderPath", dirPath);
-    return true;
-}
-
-/**
- * Asks the user his new preferred directory path and returns it
- * @returns The new directory path
- */
-export async function printDirectoryPathPrompt(): Promise<string | null> {
-    // TODO: add validation that the entered path is really a steam path & instructions on how the path has to look like
+export async function printScreenshotDirectoryPrompt(ctx: Pick<AppContext, "configService">): Promise<void> {
     const userInput = await input({
         message: "Enter a valid path to your steam screenshot directory. Type exit to return:",
         required: true,
         validate: (value: string) => {
             if (value.toLowerCase() === "exit") return true;
 
-            return isValidDirectory(value);
+            const isValid = isValidDirectory(value);
+
+            if (!isValid.valid) {
+                return isValid.reason;
+            }
+
+            return true;
         },
     });
 
-    if (userInput.toLowerCase() === "exit") return null;
+    if (userInput.toLowerCase() === "exit") return;
 
-    return path.resolve(userInput).replaceAll("\\", "/");
+    await handleScreenshotDirectoryPathChange(ctx, userInput);
 }
