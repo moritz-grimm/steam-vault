@@ -4,12 +4,13 @@ import { printAuthSettings } from "src/ui/settings-menus/auth-settings-menu";
 import { printOneDriveSettings } from "src/ui/settings-menus/onedrive-settings-menu";
 import { handleScreenshotDirectoryPathChange } from "src/ui/settings-menus/settings-handlers";
 import { isValidDirectory } from "src/utils/filepath-utils";
+import { clearScreen } from "src/utils/print";
 
 export async function printSettings(ctx: Pick<AppContext, "configService" | "cliOptions" | "authService">): Promise<void> {
     let running = true;
 
     while (running) {
-        if (!ctx.cliOptions.debug) console.clear();
+        clearScreen(ctx);
 
         const answer = await select({
             message: "Choose a setting",

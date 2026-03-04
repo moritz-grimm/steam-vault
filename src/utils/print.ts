@@ -1,4 +1,5 @@
 import chalk, { ForegroundColorName, BackgroundColorName } from "chalk";
+import { AppContext } from "src/app-context";
 
 
 export function print(message: string): void {
@@ -19,4 +20,8 @@ export function printError(message: string): void {
 
 export function printColored(message: string, color: ForegroundColorName | BackgroundColorName): void {
     console.log(chalk[color](message));
+}
+
+export function clearScreen(ctx: Pick<AppContext, "cliOptions">): void{
+    if (!ctx.cliOptions.debug) console.clear();
 }

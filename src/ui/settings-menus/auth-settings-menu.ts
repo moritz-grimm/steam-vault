@@ -1,10 +1,10 @@
 import { select } from "@inquirer/prompts";
 import { AppContext } from "src/app-context";
 import { toError } from "src/utils/error-utils";
-import { printError, printInfo } from "src/utils/print";
+import { clearScreen, printError, printInfo } from "src/utils/print";
 
 export async function printAuthSettings(ctx: Pick<AppContext, "cliOptions" | "authService">): Promise<void> {
-    if (!ctx.cliOptions.debug) console.clear();
+    clearScreen(ctx);
 
     const loggedIn = await ctx.authService.isLoggedIn();
 

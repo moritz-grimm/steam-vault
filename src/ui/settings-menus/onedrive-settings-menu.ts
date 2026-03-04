@@ -2,11 +2,12 @@ import { input, select } from "@inquirer/prompts";
 import { AppContext } from "src/app-context";
 import { handleOneDriveBaseFolderChange, handleOneDriveRootPathChange } from "src/ui/settings-menus/settings-handlers";
 import { isValidOneDriveFolderName } from "src/utils/filepath-utils";
+import { clearScreen } from "src/utils/print";
 
 export async function printOneDriveSettings(ctx: Pick<AppContext, "cliOptions" | "configService">): Promise<void> {
     let running = true;
     while (running) {
-        if (!ctx.cliOptions.debug) console.clear();
+        clearScreen(ctx);
 
         const answer = await select({
             message: "Change OneDrive Root or Basefolder Path",
@@ -52,7 +53,7 @@ const rootPathMap: Record<string, string> = {
 };
 
 async function printRootPathSelect(ctx: Pick<AppContext, "cliOptions" | "configService">): Promise<void> {
-    if (!ctx.cliOptions.debug) console.clear();
+    clearScreen(ctx);
 
     const answer = await select({
         message: "Choose a new Root Path",
@@ -99,7 +100,7 @@ async function printRootPathSelect(ctx: Pick<AppContext, "cliOptions" | "configS
 }
 
 async function printBaseFolderPrompt(ctx: Pick<AppContext, "cliOptions" | "configService">): Promise<void> {
-    if (!ctx.cliOptions.debug) console.clear();
+    clearScreen(ctx);
 
     const userInput = await input({
         message: "Enter a valid folder name. Type exit to return",
