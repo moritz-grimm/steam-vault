@@ -58,6 +58,15 @@ For all user-facing TUI output, use the print functions from `src/utils/print.ts
 - `printError(message)` — error messages (red)
 - `printColored(message, color)` — custom chalk color
 
+### Error Handling
+
+Services throw errors, callers (UI layer, orchestrators) catch and log them. Concretely:
+
+- **Services** (`src/api/`, `src/auth/`): Throw on failure. No `printError`, no `logger.error` in catch blocks. Wrap errors with context (`throw new Error(\`...: ${error.message}\`)`). Expected conditions like ENOENT on first run are handled gracefully (not thrown).
+- **Callers** (`src/ui/`, `src/backup-service.ts`): Catch errors from services, log via `logger.error()` and display via `printError()`. The inner loop in `BackupService.runFull()` catches per-file errors to allow the batch to continue.
+- **Top-level** (`src/steamvault.ts`): Wraps everything in try/catch as a last-resort handler with `printError` + `process.exit(1)`.
+- Use `toError(err)` from `src/utils/error-utils.ts` to safely convert `unknown` catches to `Error`.
+
 ### Config & Environment
 
 - Config file: `%APPDATA%/SteamVault/steamvault.config.json` (managed by `ConfigService` in `src/config-service.ts`)

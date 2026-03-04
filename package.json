@@ -11,16 +11,18 @@
         "steamvault": "./src/steamvault.ts"
     },
     "scripts": {
+        "build": "bun build ./src/steamvault.ts --compile --outfile ./build/steamvault",
         "dev": "npx tsx ./src/steamvault.ts --debug",
         "dotenvx:decrypt": "npx dotenvx decrypt",
         "dotenvx:encrypt": "npx dotenvx encrypt",
-        "lint": "npx eslint --max-warnings=0",
+        "lint": "npx eslint",
         "lint:fix": "npx eslint --fix",
-        "typecheck": "npx tsc --noEmit 2>&1",
+        "lint:strict": "npx eslint --max-warnings=0",
+        "prepare": "husky",
         "prod": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts",
         "prod:debug": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts --debug",
         "sort-package-json": "npx sort-package-json",
-        "build": "bun build ./src/steamvault.ts --compile --outfile ./build/steamvault"
+        "typecheck": "npx tsc --noEmit 2>&1"
     },
     "dependencies": {
         "@azure/msal-node": "^3.8.2",
@@ -38,6 +40,8 @@
         "cross-env": "^10.1.0",
         "eslint": "^9.39.1",
         "globals": "^16.4.0",
+        "husky": "^9.1.7",
+        "lint-staged": "^16.3.2",
         "tsx": "^4.20.6",
         "typescript": "^5.9.3"
     }
