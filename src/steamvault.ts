@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import "@dotenvx/dotenvx/config";
 import { initializeApp } from "src/initialize-app";
 import { printMainMenu } from "src/ui/main-menu";
 import { toError } from "src/utils/error-utils";
