@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createLogger, format, Logger, transports } from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
 
 interface LoggerOptions {
     logDirPath: string;
@@ -23,6 +24,22 @@ export function createAppLogger(options?: Partial<LoggerOptions>): Logger {
         fs.mkdirSync(logDirPath, { recursive: true });
     }
 
+    const errorTransport = new DailyRotateFile({
+        dirname: logDirPath,
+        filename: "error-%DATE%.log",
+        level: "error",
+        maxSize: "20m",
+        maxFiles: "14d",
+    });
+
+    const combinedTransport = new DailyRotateFile({
+        dirname: logDirPath,
+        filename: "combined-%DATE%.log",
+        level: "info",
+        maxSize: "20m",
+        maxFiles: "14d",
+    });
+
     const logger = createLogger({
         level,
         format: format.combine(
@@ -32,8 +49,8 @@ export function createAppLogger(options?: Partial<LoggerOptions>): Logger {
             format.json(),
         ),
         transports: [
-            new transports.File({ filename: path.join(logDirPath, "error.log"), level: "error" }),
-            new transports.File({ filename: path.join(logDirPath, "combined.log") }),
+            combinedTransport,
+            errorTransport,
         ],
     });
 
