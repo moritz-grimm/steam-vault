@@ -2,6 +2,8 @@ import axios from "axios";
 import { readFile } from "node:fs/promises";
 import { AuthService } from "src/auth/ms-auth";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
+import { toError } from "src/utils/error-utils";
+import { attemptWithRetries } from "src/utils/retry-utils";
 import { sanitizeGameTitle } from "src/utils/string-utils";
 import { Logger } from "winston";
 
@@ -21,16 +23,20 @@ export class OneDriveService {
         const fileBuffer = await readFile(localPath);
 
         try {
-            await axios.put(remotePath, fileBuffer, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": contentType,
-                },
-            });
+            await attemptWithRetries(async() => {
+                await axios.put(remotePath, fileBuffer, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": contentType,
+                    },
+                });
+            }, 3, 1000, (attempt, err) => { this.logger.warn(`Upload attempt ${attempt} failed with error: ${toError(err)}`);},
+            );
         } catch (err: unknown) {
-            const status = axios.isAxiosError(err) ? err.response?.status : "unknown";
-            const detail = axios.isAxiosError(err) ? JSON.stringify(err.response?.data) : String(err);
-            throw new Error(`Upload failed [${status}] for ${localPath}: ${detail}`);
+            if (axios.isAxiosError(err) && err.response) {
+                throw new Error(`Upload failed [${err.response.status}] for ${localPath}: ${err.response.data}`);
+            }
+            throw new Error(`Upload failed for ${localPath}: ${toError(err).message}`);
         }
     }
 

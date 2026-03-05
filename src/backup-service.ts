@@ -7,7 +7,7 @@ import { HashService } from "src/hash-service";
 import { toError } from "src/utils/error-utils";
 import { writeExifMetadata } from "src/utils/exif-utils";
 import { getScreenshotPath } from "src/utils/filepath-utils";
-import { printError, printSuccess } from "src/utils/print";
+import { printError, printInfo, printSuccess } from "src/utils/print";
 import { scanForScreenshotFolders, scanForScreenshots } from "src/utils/scan-utils";
 import { Logger } from "winston";
 
@@ -47,6 +47,9 @@ export class BackupService {
             }),
         );
 
+        let successCount = 0;
+        let failCount = 0;
+
         try {
             for (const game of gameScreenshots) {
                 if (game.status === "fulfilled") {
@@ -66,11 +69,13 @@ export class BackupService {
 
                                 await this.onedriveService.uploadScreenshot(gameTitle, filename, screenshotPath);
                                 await this.hashService.add(gameId, filename, screenshotHash);
+                                successCount++;
                             }
                         } catch (err: unknown) {
                             const error = toError(err);
                             this.logger.error(`Failed to upload file: ${filename}`, error);
                             printError(`Failed to upload file: ${filename} - ${error.message}`);
+                            failCount++;
                         }
                     }
                 } else {
@@ -78,7 +83,16 @@ export class BackupService {
                     printError(`Failed to load game data: ${toError(game.reason).message}`);
                 }
             }
-            printSuccess("Upload successful");
+
+            if (failCount === 0 && successCount > 0) {
+                printSuccess(`Backup complete: ${successCount} file(s) uploaded`);
+            } else if (failCount > 0 && successCount > 0) {
+                printInfo(`Backup complete: ${successCount} uploaded, ${failCount} failed`);
+            } else if (failCount > 0 && successCount === 0) {
+                printError(`Backup failed: all ${failCount} file(s) failed`);
+            } else {
+                printSuccess("No new screenshots to upload");
+            }
         } finally {
             await this.onedriveService.uploadHashJson();
             await exiftool.end();

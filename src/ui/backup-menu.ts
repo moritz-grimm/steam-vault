@@ -1,4 +1,4 @@
-import { select } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
 import { AppContext } from "src/app-context";
 import { toError } from "src/utils/error-utils";
 import { clearScreen, printError } from "src/utils/print";
@@ -34,6 +34,7 @@ export async function printPartialOrFullBackupPrompt(ctx: Pick<AppContext, "cliO
             } catch (err: unknown) {
                 printError(`Backup failed: ${toError(err).message}`);
             }
+            await input({ message: "Press Enter to return to the main menu" });
             break;
         case "partial":
             try {
@@ -41,6 +42,7 @@ export async function printPartialOrFullBackupPrompt(ctx: Pick<AppContext, "cliO
             } catch (err: unknown) {
                 printError(`Backup failed: ${toError(err).message}`);
             }
+            await input({ message: "Press Enter to return to the main menu" });
             break;
         case "return":
             break;
