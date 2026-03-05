@@ -30,6 +30,7 @@ export async function printPartialOrFullBackupPrompt(ctx: Pick<AppContext, "cliO
     switch (answer) {
         case "full":
             try {
+                clearScreen(ctx);
                 await ctx.backupService.runFull();
             } catch (err: unknown) {
                 printError(`Backup failed: ${toError(err).message}`);
