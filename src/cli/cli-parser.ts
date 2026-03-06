@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { version } from "package.json";
 
 export type CliOptions = {
     debug: boolean;
@@ -9,7 +10,7 @@ export function parseCLIArgs(): CliOptions {
 
     program
         .name("SteamVault")
-        .version("1.0.0") // TODO: Get the version from package.json
+        .version(version)
         .option("--debug", "Disable console clearing for better debugging", false);
 
     program.parse(process.argv);
