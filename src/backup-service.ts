@@ -1,3 +1,4 @@
+import { Presets, SingleBar } from "cli-progress";
 import { exiftool } from "exiftool-vendored";
 import { OneDriveService } from "src/api/onedrive-service";
 import { SteamApiService } from "src/api/steam-api-service";
@@ -7,7 +8,7 @@ import { HashService } from "src/hash-service";
 import { toError } from "src/utils/error-utils";
 import { writeExifMetadata } from "src/utils/exif-utils";
 import { getScreenshotPath } from "src/utils/filepath-utils";
-import { printError, printSuccess } from "src/utils/print";
+import { printError, printInfo, printSuccess } from "src/utils/print";
 import { scanForScreenshotFolders, scanForScreenshots } from "src/utils/scan-utils";
 import { Logger } from "winston";
 
@@ -15,7 +16,14 @@ import { Logger } from "winston";
 type GameScreenshots = {
     gameId: string,
     gameTitle: string,
-    filenames: string[]; // saved as filenames
+    filenames: string[], // saved as filenames
+};
+
+type PendingUpload = {
+    gameId: string,
+    gameTitle: string,
+    filename: string,
+    screenshotHash: string,
 };
 
 export class BackupService {
@@ -31,8 +39,9 @@ export class BackupService {
         return this.configService.get();
     }
 
-    public async runFull(): Promise<void> {
+    private async collectPendingUploads(): Promise<PendingUpload[]> {
         const gameIds = await scanForScreenshotFolders(this.config.screenshotDirectory);
+        const pendingUploads: PendingUpload[] = [];
 
         const gameScreenshots: PromiseSettledResult<GameScreenshots>[] = await Promise.allSettled(
             gameIds.map(async(id) => {
@@ -47,41 +56,85 @@ export class BackupService {
             }),
         );
 
-        try {
-            for (const game of gameScreenshots) {
-                if (game.status === "fulfilled") {
-                    const { gameId, gameTitle, filenames } = game.value;
+        for (const game of gameScreenshots) {
+            if (game.status === "fulfilled") {
+                const { gameId, gameTitle, filenames } = game.value;
 
-                    for (const filename of filenames) {
-                        try {
-                            const screenshotHash = await this.hashService.hashScreenshot(gameId, filename);
-                            if (!await this.hashService.exists(screenshotHash)) {
-                                const screenshotPath = getScreenshotPath(this.config.screenshotDirectory, gameId, filename);
-                                const screenshotBackupPath = `${this.config.backupPath}/${filename}`;
-
-                                this.logger.info(`Creating screenshot backup for: ${screenshotPath}`);
-                                this.logger.info("Writing EXIF metadata");
-                                await writeExifMetadata(screenshotPath, screenshotBackupPath);
-                                this.logger.info("EXIF metadata written successfully");
-
-                                await this.onedriveService.uploadScreenshot(gameTitle, filename, screenshotPath);
-                                await this.hashService.add(gameId, filename, screenshotHash);
-                            }
-                        } catch (err: unknown) {
-                            const error = toError(err);
-                            this.logger.error(`Failed to upload file: ${filename}`, error);
-                            printError(`Failed to upload file: ${filename} - ${error.message}`);
+                for (const filename of filenames) {
+                    try {
+                        const screenshotHash = await this.hashService.hashScreenshot(gameId, filename);
+                        if (!await this.hashService.exists(screenshotHash)) {
+                            pendingUploads.push({ gameId, gameTitle, filename, screenshotHash });
                         }
+                    } catch (err: unknown) {
+                        this.logger.error("Error while collecting screenshot to upload", toError(err));
                     }
-                } else {
-                    this.logger.error(`Failed to load data`, game.reason);
-                    printError(`Failed to load game data: ${toError(game.reason).message}`);
                 }
+            } else {
+                this.logger.error(`Failed to load data`, game.reason);
+                printError(`Failed to load game data: ${toError(game.reason).message}`);
             }
-            printSuccess("Upload successful");
-        } finally {
-            await this.onedriveService.uploadHashJson();
-            await exiftool.end();
+        }
+
+        return pendingUploads;
+    }
+
+    private async uploadScreenshots(pendingUploads: PendingUpload[]): Promise<{ successCount: number; failCount: number }> {
+        const progressBar = new SingleBar({}, Presets.shades_classic);
+        progressBar.start(pendingUploads.length, 0);
+        let successCount = 0;
+        let failCount = 0;
+        const errorArray: string[] = [];
+
+        for (const upload of pendingUploads) {
+            const { gameId, gameTitle, filename, screenshotHash } = upload;
+            try {
+                const screenshotPath = getScreenshotPath(this.config.screenshotDirectory, gameId, filename);
+                const screenshotBackupPath = `${this.config.backupPath}/${filename}`;
+
+                this.logger.info(`Creating screenshot backup for: ${screenshotPath}`);
+                this.logger.info("Writing EXIF metadata");
+                await writeExifMetadata(screenshotPath, screenshotBackupPath);
+                this.logger.info("EXIF metadata written successfully");
+
+                await this.onedriveService.uploadScreenshot(gameTitle, filename, screenshotPath);
+                await this.hashService.add(gameId, filename, screenshotHash);
+                successCount++;
+            } catch (err: unknown) {
+                const error = toError(err);
+                this.logger.error(`Failed to upload file: ${filename}`, error);
+                errorArray.push(`Failed to upload file: ${filename} - ${error.message}`);
+                failCount++;
+            }
+            progressBar.increment();
+        }
+        progressBar.stop();
+
+        errorArray.forEach(err => {
+            printError(err);
+        });
+
+        return { successCount, failCount };
+    }
+
+    public async runFull(): Promise<void> {
+        const pendingUploads = await this.collectPendingUploads();
+
+        if (pendingUploads.length === 0) {
+            printSuccess("No new screenshots to upload");
+            return;
+        }
+
+        const result = await this.uploadScreenshots(pendingUploads);
+        await this.onedriveService.uploadHashJson();
+        await exiftool.end();
+
+        if (result.failCount === 0 && result.successCount > 0) {
+            printSuccess(`Backup complete: ${result.successCount} file(s) uploaded`);
+        } else if (result.failCount > 0 && result.successCount > 0) {
+            printInfo(`Backup complete: ${result.successCount} uploaded, ${result.failCount} failed`);
+        } else if (result.failCount > 0 && result.successCount === 0) {
+            printError(`Backup failed: all ${result.failCount} file(s) failed`);
         }
     }
 
