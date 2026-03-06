@@ -12,3 +12,6 @@ todo.md
 # dotenvx
 !/.env
 .env.keys
+
+# vitest
+coverage
