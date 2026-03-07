@@ -9,7 +9,7 @@ import { HashService } from "src/hash-service";
 import { toError } from "src/utils/error-utils";
 import { writeExifMetadata } from "src/utils/exif-utils";
 import { getScreenshotPath } from "src/utils/filepath-utils";
-import { printError, printInfo, printSuccess } from "src/utils/print";
+import { print, printError, printInfo, printSuccess } from "src/utils/print";
 import { scanForScreenshotFolders, scanForScreenshots } from "src/utils/scan-utils";
 import { Logger } from "winston";
 
@@ -141,6 +141,24 @@ export class BackupService {
         } else if (result.failCount > 0 && result.successCount === 0) {
             printError(`Backup failed: all ${result.failCount} file(s) failed`);
         }
+    }
+
+    public async runDryRunFull(): Promise<void> {
+        const pendingUploads = await this.collectPendingUploads();
+
+        if (pendingUploads.length === 0) {
+            printSuccess("No new screenshots to upload");
+            return;
+        }
+
+        for (const upload of pendingUploads) {
+            const { gameTitle, filename } = upload;
+
+            print(`[DRY-RUN] Uploading Screenshot: ${filename} from game ${gameTitle}`);
+        }
+
+        const rootPath = this.config.oneDriveRootPath.replace("special/", "");
+        printInfo(`[DRY-RUN] Would upload ${pendingUploads.length} screenshots to ${rootPath}/${this.config.oneDriveBaseFolder}/Game-Title`);
     }
 
     // Ignore because it's not implemented yet

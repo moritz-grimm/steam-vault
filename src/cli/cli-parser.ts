@@ -2,7 +2,8 @@ import { Command } from "commander";
 import { version } from "package.json";
 
 export type CliOptions = {
-    debug: boolean;
+    debug: boolean,
+    dryRun: boolean,
 };
 
 export function parseCLIArgs(): CliOptions {
@@ -11,12 +12,14 @@ export function parseCLIArgs(): CliOptions {
     program
         .name("SteamVault")
         .version(version)
-        .option("--debug", "Disable console clearing for better debugging", false);
+        .option("-d, --debug", "Disable console clearing for better debugging", false)
+        .option("--dry-run", "Show what would be uploaded without uploading", false);
 
     program.parse(process.argv);
     const options: CliOptions = program.opts();
 
     return {
         debug: options.debug,
+        dryRun: options.dryRun,
     } as CliOptions;
 }

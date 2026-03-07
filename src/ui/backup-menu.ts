@@ -13,6 +13,12 @@ export async function printPartialOrFullBackupPrompt(ctx: Pick<AppContext, "cliO
                 name: "Full",
                 value: "full",
                 description: "Backup every screenshot folder",
+                disabled: ctx.cliOptions.dryRun,
+            },
+            {
+                name: "Full Dry-Run",
+                value: "fullDryRun",
+                description: "Run a full backup without actually uploading any files",
             },
             // {
             //     name: "Partial",
@@ -32,6 +38,15 @@ export async function printPartialOrFullBackupPrompt(ctx: Pick<AppContext, "cliO
             try {
                 clearScreen(ctx);
                 await ctx.backupService.runFull();
+            } catch (err: unknown) {
+                printError(`Backup failed: ${toError(err).message}`);
+            }
+            await input({ message: "Press Enter to return to the main menu" });
+            break;
+        case "fullDryRun":
+            try {
+                clearScreen(ctx);
+                await ctx.backupService.runDryRunFull();
             } catch (err: unknown) {
                 printError(`Backup failed: ${toError(err).message}`);
             }

@@ -22,6 +22,11 @@ export async function printMainMenu(ctx: Pick<AppContext, "configService" | "cli
             }
         }
 
+        if (ctx.cliOptions.dryRun) {
+            clearScreen(ctx);
+            printInfo("Running in Dry-Run mode. No new screenshots will be uploaded");
+        }
+
         const answer = await select({
             message: "Choose an option",
             choices: [
