@@ -1,5 +1,6 @@
 import { Presets, SingleBar } from "cli-progress";
 import { exiftool } from "exiftool-vendored";
+import pLimit from "p-limit";
 import { OneDriveService } from "src/api/onedrive-service";
 import { SteamApiService } from "src/api/steam-api-service";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
@@ -12,7 +13,6 @@ import { printError, printInfo, printSuccess } from "src/utils/print";
 import { scanForScreenshotFolders, scanForScreenshots } from "src/utils/scan-utils";
 import { Logger } from "winston";
 
-// TODO: Implement concurrent uploading
 type GameScreenshots = {
     gameId: string,
     gameTitle: string,
@@ -80,34 +80,39 @@ export class BackupService {
     }
 
     private async uploadScreenshots(pendingUploads: PendingUpload[]): Promise<{ successCount: number; failCount: number }> {
+        const limit = pLimit(5);
         const progressBar = new SingleBar({}, Presets.shades_classic);
         progressBar.start(pendingUploads.length, 0);
         let successCount = 0;
         let failCount = 0;
         const errorArray: string[] = [];
 
-        for (const upload of pendingUploads) {
-            const { gameId, gameTitle, filename, screenshotHash } = upload;
-            try {
-                const screenshotPath = getScreenshotPath(this.config.screenshotDirectory, gameId, filename);
-                const screenshotBackupPath = `${this.config.backupPath}/${filename}`;
+        const tasks = pendingUploads.map(upload =>
+            limit(async() => {
+                const { gameId, gameTitle, filename, screenshotHash } = upload;
+                try {
+                    const screenshotPath = getScreenshotPath(this.config.screenshotDirectory, gameId, filename);
+                    const screenshotBackupPath = `${this.config.backupPath}/${filename}`;
 
-                this.logger.info(`Creating screenshot backup for: ${screenshotPath}`);
-                this.logger.info("Writing EXIF metadata");
-                await writeExifMetadata(screenshotPath, screenshotBackupPath);
-                this.logger.info("EXIF metadata written successfully");
+                    this.logger.info(`Creating screenshot backup for: ${screenshotPath}`);
+                    this.logger.info("Writing EXIF metadata");
+                    await writeExifMetadata(screenshotPath, screenshotBackupPath);
+                    this.logger.info("EXIF metadata written successfully");
 
-                await this.onedriveService.uploadScreenshot(gameTitle, filename, screenshotPath);
-                await this.hashService.add(gameId, filename, screenshotHash);
-                successCount++;
-            } catch (err: unknown) {
-                const error = toError(err);
-                this.logger.error(`Failed to upload file: ${filename}`, error);
-                errorArray.push(`Failed to upload file: ${filename} - ${error.message}`);
-                failCount++;
-            }
-            progressBar.increment();
-        }
+                    await this.onedriveService.uploadScreenshot(gameTitle, filename, screenshotPath);
+                    await this.hashService.add(gameId, filename, screenshotHash);
+                    successCount++;
+                } catch (err: unknown) {
+                    const error = toError(err);
+                    this.logger.error(`Failed to upload file: ${filename}`, error);
+                    errorArray.push(`Failed to upload file: ${filename} - ${error.message}`);
+                    failCount++;
+                }
+                progressBar.increment();
+            }),
+        );
+
+        await Promise.allSettled(tasks);
         progressBar.stop();
 
         errorArray.forEach(err => {
