@@ -15,19 +15,19 @@ SteamVault is a TypeScript CLI application that backs up Steam screenshots to Mi
 - `npm run typecheck` — TypeScript type checking (`tsc --noEmit`)
 - `npm run build` — Compile to standalone executable via Bun
 
-No test framework is configured.
+- `npm test` — Run tests via Vitest
 
 ## Tech Stack
 
 - **TypeScript** (strict mode, ESNext target, ES modules)
 - **Runtime:** Node.js via tsx; Bun for compilation only
-- **Key deps:** @azure/msal-node (auth), @inquirer/prompts (interactive menus), commander (CLI args), axios (HTTP), winston (logging), exiftool-vendored (EXIF writing), @dotenvx/dotenvx (encrypted env vars)
+- **Key deps:** @azure/msal-node (auth), @inquirer/prompts (interactive menus), commander (CLI args), axios (HTTP), winston (logging), exiftool-vendored (EXIF writing)
 
 ## Architecture
 
 ### Entry & Initialization Flow
 
-`src/steamvault.ts` → loads encrypted env vars → `initializeApp()` → `printMainMenu(ctx)`
+`src/steamvault.ts` → `initializeApp()` → `printMainMenu(ctx)`
 
 `initializeApp()` in `src/initialize-app.ts` creates `%APPDATA%/SteamVault` directories, loads config from disk, instantiates all services with explicit constructor dependency injection, runs Microsoft auth, and returns an `AppContext`.
 
@@ -70,7 +70,6 @@ Services throw errors, callers (UI layer, orchestrators) catch and log them. Con
 ### Config & Environment
 
 - Config file: `%APPDATA%/SteamVault/steamvault.config.json` (managed by `ConfigService` in `src/config-service.ts`)
-- Environment vars: encrypted in `.env` via dotenvx, decryption keys in `.env.keys`
 - Path placeholders like `%APPDATA%` are substituted at runtime
 
 ### Import Paths
