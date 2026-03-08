@@ -17,7 +17,7 @@ type GameHashes = {
 export class HashService {
     private hashes: GameHashes | null = null;
 
-    public constructor(
+    constructor(
         private readonly configService: ConfigService,
         private readonly logger: Logger,
     ) {}
@@ -86,7 +86,7 @@ export class HashService {
         this.logger.info("Successfully wrote new screenshot hash to disk");
     }
 
-    compareRemoteAndLocaleHashJson(): void {
+    private compareRemoteAndLocaleHashJson(): void {
         throw new NotImplementedException;
     }
 }
