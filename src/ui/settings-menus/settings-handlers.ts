@@ -1,8 +1,8 @@
-import path from "node:path";
+import { resolve } from "node:path";
 import { AppContext } from "src/app-context";
 
 export async function handleScreenshotDirectoryPathChange(ctx: Pick<AppContext, "configService">, rawPath: string): Promise<void> {
-    const resolved = path.resolve(rawPath).replaceAll("\\", "/");
+    const resolved = resolve(rawPath).replaceAll("\\", "/");
     await ctx.configService.write("screenshotDirectory", resolved);
 }
 
