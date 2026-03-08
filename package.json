@@ -41,6 +41,7 @@
         "exiftool-vendored": "^33.2.0",
         "p-limit": "^7.3.0",
         "tsx": "^4.20.6",
+        "update-notifier": "^7.3.1",
         "winston": "^3.18.3",
         "winston-daily-rotate-file": "^5.0.0"
     },
@@ -48,6 +49,7 @@
         "@moritz-grimm/eslint-config-moritz-grimm": "^1.0.1",
         "@types/cli-progress": "^3.11.6",
         "@types/node": "^24.10.0",
+        "@types/update-notifier": "^6.0.8",
         "@vitest/coverage-v8": "^4.0.18",
         "cross-env": "^10.1.0",
         "eslint": "^9.39.1",

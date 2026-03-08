@@ -1,12 +1,22 @@
-import { select } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
 import { AppContext } from "src/app-context";
 import { printPartialOrFullBackupPrompt } from "src/ui/backup-menu";
-import { promptAutodetectDirectory, printScreenshotDirectoryPrompt } from "src/ui/settings-menus/directory-settings-menu";
+import { printScreenshotDirectoryPrompt, promptAutodetectDirectory } from "src/ui/settings-menus/directory-settings-menu";
 import { printSettings } from "src/ui/settings-menus/main-settings-menu";
 import { clearScreen, print, printInfo } from "src/utils/print";
+import updateNotifier from "update-notifier";
+import packageJson from "../../package.json" assert { type: "json" };
 
 export async function printMainMenu(ctx: Pick<AppContext, "configService" | "cliOptions" | "authService" | "backupService">): Promise<void> {
     let running = true;
+
+    const notifier = updateNotifier({ pkg: packageJson });
+
+    if (notifier.update) {
+        const info = await notifier.fetchInfo();
+        printInfo(`Update available: ${info.current} => ${info.latest}`);
+        await input({ message: "Press Enter to continue" });
+    }
 
     while (running) {
         clearScreen(ctx);
