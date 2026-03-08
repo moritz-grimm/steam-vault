@@ -24,3 +24,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI for linting, type checking, and tests
 - Vitest test suite
 - Husky pre-commit hooks (lint + typecheck via lint-staged)
+
+## 1.0.1 - 2026-03-08
+
+### Changed
+
+- Add tsup build step for npm publishing
+- Add custom icon for executable
+
+### Removed
+
+- Remove daily log rotation from README feature list
