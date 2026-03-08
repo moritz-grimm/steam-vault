@@ -6,23 +6,24 @@
     "license": "MIT",
     "author": "moritz-grimm",
     "type": "module",
-    "main": "./src/steamvault.ts",
+    "main": "./dist/steamvault.js",
     "bin": {
-        "steamvault": "src/steamvault.ts"
+        "steamvault": "dist/steamvault.js"
     },
     "files": [
-        "src/",
+        "dist/",
         "LICENSE",
         "README.md"
     ],
     "scripts": {
-        "build": "bun build ./src/steamvault.ts --compile --outfile ./build/steamvault",
+        "build:bun": "bun build ./src/steamvault.ts --compile --outfile ./build/steamvault --windows-icon=assets/steamvault.ico",
+        "build:npm": "tsup",
         "dev": "npx tsx ./src/steamvault.ts --debug",
         "lint": "npx eslint",
         "lint:fix": "npx eslint --fix",
         "lint:strict": "npx eslint --max-warnings=0",
         "prepare": "husky",
-        "prepublishOnly": "npm run lint:strict && npm run typecheck && npm run test",
+        "prepublishOnly": "npm run lint:strict && npm run typecheck && npm run test && npm run build:npm",
         "prod": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts",
         "prod:debug": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts --debug",
         "sort-package-json": "npx sort-package-json",
@@ -40,7 +41,6 @@
         "commander": "^14.0.2",
         "exiftool-vendored": "^33.2.0",
         "p-limit": "^7.3.0",
-        "tsx": "^4.20.6",
         "update-notifier": "^7.3.1",
         "winston": "^3.18.3",
         "winston-daily-rotate-file": "^5.0.0"
@@ -56,6 +56,8 @@
         "globals": "^16.4.0",
         "husky": "^9.1.7",
         "lint-staged": "^16.3.2",
+        "tsup": "^8.5.1",
+        "tsx": "^4.20.6",
         "typescript": "^5.9.3",
         "vite-tsconfig-paths": "^6.1.1",
         "vitest": "^4.0.18"
