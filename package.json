@@ -16,7 +16,7 @@
         "README.md"
     ],
     "scripts": {
-        "build": "bun build ./src/steamvault.ts --compile --outfile ./build/steamvault",
+        "build": "bun build ./src/steamvault.ts --compile --outfile ./build/steamvault --windows-icon=assets/steamvault.ico",
         "dev": "npx tsx ./src/steamvault.ts --debug",
         "lint": "npx eslint",
         "lint:fix": "npx eslint --fix",
