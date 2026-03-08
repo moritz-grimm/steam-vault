@@ -1,5 +1,6 @@
-import fs from "node:fs";
-import path from "node:path";
+import { existsSync, mkdirSync } from "node:fs";
+import { resolve } from "node:path";
+import { getAppDataPath } from "src/utils/filepath-utils";
 import { createLogger, format, Logger, transports } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
@@ -10,7 +11,7 @@ interface LoggerOptions {
 }
 
 function getDefaultLogDir(): string {
-    return path.resolve(process.env.APPDATA || "", "SteamVault/logs");
+    return resolve(getAppDataPath(), "SteamVault/logs");
 }
 
 export function createAppLogger(options?: Partial<LoggerOptions>): Logger {
@@ -20,8 +21,8 @@ export function createAppLogger(options?: Partial<LoggerOptions>): Logger {
         enableConsole = process.env.NODE_ENV !== "production",
     } = options ?? {};
 
-    if (!fs.existsSync(logDirPath)) {
-        fs.mkdirSync(logDirPath, { recursive: true });
+    if (!existsSync(logDirPath)) {
+        mkdirSync(logDirPath, { recursive: true });
     }
 
     const errorTransport = new DailyRotateFile({

@@ -1,5 +1,5 @@
-import fs from "node:fs/promises";
-import path from "node:path";
+import { access, mkdir } from "node:fs/promises";
+import { resolve } from "node:path";
 import { GameTitleCache } from "src/api/game-title-cache";
 import { OneDriveService } from "src/api/onedrive-service";
 import { SteamApiService } from "src/api/steam-api-service";
@@ -11,9 +11,10 @@ import { configPath, ConfigService, SteamVaultConfig } from "src/config-service"
 import { HashService } from "src/hash-service";
 import { writeToJsonAsync } from "src/utils/json-utils";
 import { createAppLogger } from "src/utils/logger";
+import { getAppDataPath } from "src/utils/filepath-utils";
 
-const appDataFolder = path.resolve(process.env.APPDATA || "", "SteamVault");
-const backupPath = path.resolve(appDataFolder, "backup");
+const appDataFolder = resolve(getAppDataPath(), "SteamVault");
+const backupPath = resolve(appDataFolder, "backup");
 
 const defaultConfig: SteamVaultConfig = {
     screenshotDirectory: "",
@@ -40,18 +41,18 @@ const defaultConfig: SteamVaultConfig = {
  * @throws {Error} May throw errors during directory creation, config loading, or MS authentication
  */
 export async function initializeApp(): Promise<AppContext> {
-    await fs.mkdir(appDataFolder, { recursive: true });
-    await fs.mkdir(backupPath, { recursive: true });
+    await mkdir(appDataFolder, { recursive: true });
+    await mkdir(backupPath, { recursive: true });
 
     try {
-        await fs.access(configPath);
+        await access(configPath);
     } catch {
         await writeToJsonAsync(configPath, defaultConfig);
     }
 
     const cliOptions = parseCLIArgs();
     const configService = await ConfigService.create();
-    const logger = createAppLogger();
+    const logger = createAppLogger({ logDirPath: configService.get().logDirPath });
     logger.info("CLI options:", cliOptions);
     const gameTitleCache = new GameTitleCache(configService, logger);
 

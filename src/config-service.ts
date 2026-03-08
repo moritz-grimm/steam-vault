@@ -1,8 +1,9 @@
-import path from "node:path";
+import { resolve } from "node:path";
+import { getAppDataPath } from "src/utils/filepath-utils";
 import { loadJsonAsync, writeToJsonAsync } from "src/utils/json-utils";
 import { toError } from "./utils/error-utils";
 
-export const configPath = path.resolve(process.env.APPDATA || "", "SteamVault/steamvault.config.json");
+export const configPath = resolve(getAppDataPath(), "SteamVault/steamvault.config.json");
 
 export type SteamVaultConfig = {
     screenshotDirectory: string,
@@ -26,7 +27,7 @@ export class ConfigService {
 
     private static resolveConfigPlaceholders(configString: string): string {
         return configString
-            .replaceAll("%APPDATA%", process.env.APPDATA || "");
+            .replaceAll("%APPDATA%", getAppDataPath());
     }
 
     private static async load(): Promise<SteamVaultConfig> {

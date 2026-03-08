@@ -177,3 +177,11 @@ export function getScreenshotFolder(basePath: string, gameId: string): string {
 export function getScreenshotPath(basePath: string, gameId: string, filename: string): string {
     return `${getScreenshotFolder(basePath, gameId)}/${filename}`;
 }
+
+export function getAppDataPath(): string {
+    const appData = process.env.APPDATA;
+    if (!appData) {
+        throw new Error("APPDATA environment variable is not set. SteamVault requires Windows with APPDATA to work");
+    }
+    return appData;
+}
