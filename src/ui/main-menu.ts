@@ -1,7 +1,8 @@
 import { select } from "@inquirer/prompts";
 import { AppContext } from "src/app-context";
 import { printPartialOrFullBackupPrompt } from "src/ui/backup-menu";
-import { printScreenshotDirectoryPrompt, printSettings } from "src/ui/settings-menus/main-settings-menu";
+import { promptAutodetectDirectory, printScreenshotDirectoryPrompt } from "src/ui/settings-menus/directory-settings-menu";
+import { printSettings } from "src/ui/settings-menus/main-settings-menu";
 import { clearScreen, print, printInfo } from "src/utils/print";
 
 export async function printMainMenu(ctx: Pick<AppContext, "configService" | "cliOptions" | "authService" | "backupService">): Promise<void> {
@@ -11,11 +12,8 @@ export async function printMainMenu(ctx: Pick<AppContext, "configService" | "cli
         clearScreen(ctx);
 
         if (!ctx.configService.get().screenshotDirectory) {
-            printInfo("No screenshot path detected. Please enter one to continue");
-
-            await printScreenshotDirectoryPrompt(ctx);
-
-            if (!ctx.configService.get().screenshotDirectory) {
+            const configured = await promptInitialScreenshotDirectory(ctx);
+            if (!configured) {
                 clearScreen(ctx);
                 print("No screenshot directory detected. Exiting program");
                 return;
@@ -62,4 +60,19 @@ export async function printMainMenu(ctx: Pick<AppContext, "configService" | "cli
                 break;
         }
     }
+}
+
+/**
+ * Handles initial screenshot directory setup when none is configured.
+ * Tries auto-detection first, then falls back to manual input.
+ * @returns true if a directory was configured, false if the user skipped/cancelled
+ */
+async function promptInitialScreenshotDirectory(ctx: Pick<AppContext, "configService">): Promise<boolean> {
+    const accepted = await promptAutodetectDirectory(ctx);
+    if (accepted) return true;
+
+    printInfo("No screenshot path detected. Please enter one to continue");
+    await printScreenshotDirectoryPrompt(ctx);
+
+    return !!ctx.configService.get().screenshotDirectory;
 }

@@ -1,9 +1,8 @@
-import { input, select } from "@inquirer/prompts";
+import { select } from "@inquirer/prompts";
 import { AppContext } from "src/app-context";
 import { printAuthSettings } from "src/ui/settings-menus/auth-settings-menu";
+import { printDirectorySettings } from "src/ui/settings-menus/directory-settings-menu";
 import { printOneDriveSettings } from "src/ui/settings-menus/onedrive-settings-menu";
-import { handleScreenshotDirectoryPathChange } from "src/ui/settings-menus/settings-handlers";
-import { isValidDirectory } from "src/utils/filepath-utils";
 import { clearScreen } from "src/utils/print";
 
 export async function printSettings(ctx: Pick<AppContext, "configService" | "cliOptions" | "authService">): Promise<void> {
@@ -16,8 +15,8 @@ export async function printSettings(ctx: Pick<AppContext, "configService" | "cli
             message: "Choose a setting",
             choices: [
                 {
-                    name: "Screenshot Directory",
-                    value: "screenshotDirectory",
+                    name: "Screenshot Directory Settings",
+                    value: "screenshotDirSettings",
                     description: `Current directory: '${ctx.configService.get().screenshotDirectory}'`,
                 },
                 {
@@ -40,8 +39,8 @@ export async function printSettings(ctx: Pick<AppContext, "configService" | "cli
         });
 
         switch (answer) {
-            case "screenshotDirectory":
-                await printScreenshotDirectoryPrompt(ctx);
+            case "screenshotDirSettings":
+                await printDirectorySettings(ctx);
                 break;
             case "oneDriveSettings":
                 await printOneDriveSettings(ctx);
@@ -54,26 +53,4 @@ export async function printSettings(ctx: Pick<AppContext, "configService" | "cli
                 break;
         };
     }
-}
-
-export async function printScreenshotDirectoryPrompt(ctx: Pick<AppContext, "configService">): Promise<void> {
-    const userInput = await input({
-        message: "Enter a valid path to your steam screenshot directory. Type exit to return:",
-        required: true,
-        validate: (value: string) => {
-            if (value.toLowerCase() === "exit") return true;
-
-            const isValid = isValidDirectory(value);
-
-            if (!isValid.valid) {
-                return isValid.reason;
-            }
-
-            return true;
-        },
-    });
-
-    if (userInput.toLowerCase() === "exit") return;
-
-    await handleScreenshotDirectoryPathChange(ctx, userInput);
 }

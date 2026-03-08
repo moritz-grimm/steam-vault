@@ -1,6 +1,7 @@
-import fs from "node:fs";
-import path from "node:path";
+import { Dirent, readdirSync, statSync } from "node:fs";
+import { dirname, join, normalize, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { readRegistryValue } from "src/utils/registry-utils";
 
 type ValidationResult =
     | { valid: true }
@@ -21,7 +22,7 @@ type ValidationResult =
  */
 export function getDirname(): string {
     const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
+    const __dirname = dirname(__filename);
 
     return __dirname;
 }
@@ -33,10 +34,10 @@ export function getDirname(): string {
  */
 export function isValidDirectory(directoryPath: string): ValidationResult {
     try {
-        const cleanedPath = path.normalize(directoryPath.trim());
-        const absolutePath = path.resolve(cleanedPath);
+        const cleanedPath = normalize(directoryPath.trim());
+        const absolutePath = resolve(cleanedPath);
 
-        if (fs.statSync(absolutePath).isDirectory()) {
+        if (statSync(absolutePath).isDirectory()) {
             return { valid: true };
         }
 
@@ -44,6 +45,104 @@ export function isValidDirectory(directoryPath: string): ValidationResult {
     } catch {
         return { valid: false, reason: "Path does not exist" };
     }
+}
+
+const USERDATA_SCREENSHOT_SUFFIX = "760/remote";
+
+const FALLBACK_STEAM_PATHS = [
+    "C:/Program Files (x86)/Steam",
+    "C:/Program Files/Steam",
+    "D:/Steam",
+    "D:/SteamLibrary",
+];
+
+/**
+ * Attempts to auto-detect the Steam screenshot directory.
+ *
+ * 1. Reads the Steam install path from the Windows registry
+ * 2. Falls back to common default installation paths
+ * 3. For each candidate, scans `userdata/{userId}/760/remote` and validates
+ *
+ * @returns The first valid screenshot directory path, or null if none found
+ */
+export async function detectSteamScreenshotPath(): Promise<string | null> {
+    const registryPath = await readRegistryValue("HKCU", String.raw`Software\Valve\Steam`, "SteamPath");
+
+    const candidates = registryPath ? [registryPath, ...FALLBACK_STEAM_PATHS.filter(p => resolve(p) !== resolve(registryPath))] : FALLBACK_STEAM_PATHS;
+
+    for (const steamRoot of candidates) {
+        const result = findScreenshotPathInSteamRoot(steamRoot);
+        if (result) return result;
+    }
+
+    return null;
+}
+
+/**
+ * Scans a Steam root directory for valid screenshot paths under `userdata/{userId}/760/remote`.
+ * @returns The first valid path found, or null.
+ */
+function findScreenshotPathInSteamRoot(steamRoot: string): string | null {
+    const userdataPath = join(steamRoot, "userdata");
+
+    let userFolders: Dirent[];
+    try {
+        userFolders = readdirSync(userdataPath, { withFileTypes: true });
+    } catch {
+        return null;
+    }
+
+    for (const folder of userFolders) {
+        if (!folder.isDirectory() || !/^\d+$/.test(folder.name)) continue;
+
+        const screenshotRoot = join(userdataPath, folder.name, USERDATA_SCREENSHOT_SUFFIX);
+        const normalized = screenshotRoot.split(/[\\/]/).join("/");
+
+        if (isSteamScreenshotDirectory(normalized).valid) {
+            return normalized;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Validates whether a directory looks like a Steam screenshot root directory.
+ * Expects the `760/remote` level: contains numeric gameId subfolders,
+ * where at least one has a `screenshots` subdirectory.
+ */
+export function isSteamScreenshotDirectory(directoryPath: string): ValidationResult {
+    const dirResult = isValidDirectory(directoryPath);
+    if (!dirResult.valid) return dirResult;
+
+    const absolutePath = resolve(normalize(directoryPath.trim()));
+
+    let entries: Dirent[];
+    try {
+        entries = readdirSync(absolutePath, { withFileTypes: true });
+    } catch {
+        return { valid: false, reason: "Cannot read directory" };
+    }
+
+    const gameIdFolders = entries.filter(e => e.isDirectory() && /^\d+$/.test(e.name));
+    if (gameIdFolders.length === 0) {
+        return { valid: false, reason: "No numeric game ID folders found" };
+    }
+
+    const hasScreenshotsSubfolder = gameIdFolders.some(folder => {
+        const screenshotsPath = join(absolutePath, folder.name, "screenshots");
+        try {
+            return statSync(screenshotsPath).isDirectory();
+        } catch {
+            return false;
+        }
+    });
+
+    if (!hasScreenshotsSubfolder) {
+        return { valid: false, reason: "No game folder contains a 'screenshots' subdirectory" };
+    }
+
+    return { valid: true };
 }
 
 export function isValidOneDriveFolderName(name: string): ValidationResult {
