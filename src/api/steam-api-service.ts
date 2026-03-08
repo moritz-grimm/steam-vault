@@ -5,6 +5,7 @@ import { Logger } from "winston";
 
 type SteamApiResponse = {
     [appId: string]: {
+        success: boolean,
         data: {
             name: string,
         }
@@ -12,7 +13,7 @@ type SteamApiResponse = {
 };
 
 export class SteamApiService {
-    public constructor(
+    constructor(
         private readonly logger: Logger,
         private readonly gameTitleCache: GameTitleCache,
     ) {}
@@ -25,8 +26,11 @@ export class SteamApiService {
 
         try {
             const res = await axios.get<SteamApiResponse>(`http://store.steampowered.com/api/appdetails/?appids=${appId}`);
+            let gameTitle;
             this.logger.info(`${appId} not found in cache. Getting title from api`);
-            const gameTitle = res.data[appId].data.name;
+            if (res.data[appId]?.success) {
+                gameTitle = res.data[appId].data.name;
+            }
 
             if (!gameTitle) {
                 throw new Error(`No data found for appId: ${appId}`);
