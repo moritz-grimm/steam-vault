@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 
 import { initializeApp } from "src/initialize-app";
 import { printMainMenu } from "src/ui/main-menu";
