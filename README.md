@@ -14,7 +14,6 @@ Automatically backup your Steam screenshots to OneDrive.
 - **Game title resolution** - organizes screenshots into folders named after the game (via the Steam Store API)
 - **Game title caching** - caches API lookups to disk so subsequent runs are faster
 - **Dry-run mode** - preview what would be uploaded without making any changes
-- **Daily log rotation** - logs are rotated automatically in `%APPDATA%/SteamVault/logs`
 
 ## Prerequisites
 
