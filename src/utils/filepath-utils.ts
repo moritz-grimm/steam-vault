@@ -178,6 +178,10 @@ export function getScreenshotPath(basePath: string, gameId: string, filename: st
     return `${getScreenshotFolder(basePath, gameId)}/${filename}`;
 }
 
+/**
+ * Returns the value of the `APPDATA` environment variable.
+ * @throws If `APPDATA` is not set (non-Windows or misconfigured environment).
+ */
 export function getAppDataPath(): string {
     const appData = process.env.APPDATA;
     if (!appData) {

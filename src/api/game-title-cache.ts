@@ -33,16 +33,23 @@ export class GameTitleCache {
         }
     }
 
+    /** Returns the cached game title for the given app ID, or `undefined` if not cached. */
     public async get(appId: string): Promise<string | undefined> {
         const entries = await this.loadFromDisk();
         return entries[appId];
     }
 
+    /** Returns `true` if the cache contains an entry for the given app ID. */
     public async has(appId: string): Promise<boolean> {
         const entries = await this.loadFromDisk();
         return appId in entries;
     }
 
+    /**
+     * Adds or updates a game title in the cache and persists to disk.
+     * @param appId - Steam application ID.
+     * @param gameTitle - The resolved game title to cache.
+     */
     public async set(appId: string, gameTitle: string): Promise<void> {
         const entries = await this.loadFromDisk();
         entries[appId] = gameTitle;

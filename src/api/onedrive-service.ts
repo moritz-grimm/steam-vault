@@ -55,6 +55,10 @@ export class OneDriveService {
         this.logger.info(`Screenshot uploaded: ${filename}`);
     }
 
+    /**
+     * Uploads the local `screenshot.hashes.json` to OneDrive so the hash state
+     * is persisted remotely alongside the screenshots.
+     */
     public async uploadHashJson(): Promise<void> {
         const localPath = this.config.screenshotHashes;
         const remotePath = `https://graph.microsoft.com/v1.0/me/drive/${this.config.oneDriveRootPath}:/${this.config.oneDriveBaseFolder}/screenshot.hashes.json:/content`;

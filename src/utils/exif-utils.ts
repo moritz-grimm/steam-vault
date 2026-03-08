@@ -2,6 +2,13 @@ import { exiftool } from "exiftool-vendored";
 import { copyFile, stat, unlink } from "node:fs/promises";
 import { toError } from "src/utils/error-utils";
 
+/**
+ * Writes EXIF metadata (DateTimeOriginal, XPComment) to a screenshot file.
+ * Creates a backup copy first; if the EXIF write fails, the original is restored.
+ * @param filePath - Path to the screenshot to modify in-place.
+ * @param backupPath - Temporary path for the safety backup copy.
+ * @throws If the write fails and the backup restore also fails.
+ */
 export async function writeExifMetadata(filePath: string, backupPath: string): Promise<void> {
     try {
         await copyFile(filePath, backupPath);

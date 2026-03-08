@@ -48,6 +48,11 @@ export class ConfigService {
         }
     }
 
+    /**
+     * Factory method that loads the config from disk and returns a ready-to-use ConfigService.
+     * Resolves path placeholders (e.g. `%APPDATA%`) in all string values.
+     * @throws If the config file cannot be read or parsed.
+     */
     public static async create(): Promise<ConfigService> {
         const config = await ConfigService.load();
         return new ConfigService(config);
@@ -57,10 +62,17 @@ export class ConfigService {
         this.config = await ConfigService.load();
     }
 
+    /** Returns the current in-memory config snapshot. */
     public get(): SteamVaultConfig {
         return this.config;
     }
 
+    /**
+     * Updates a single config key, persists to disk, and reloads.
+     * @param jsonKey - The config property to update.
+     * @param newValue - The new value to set.
+     * @throws If the config file cannot be written.
+     */
     public async write(jsonKey: keyof SteamVaultConfig, newValue: string): Promise<void> {
         this.config[jsonKey] = newValue;
 

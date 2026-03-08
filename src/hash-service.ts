@@ -67,6 +67,13 @@ export class HashService {
         );
     }
 
+    /**
+     * Records a screenshot hash in the hash map and persists to disk.
+     * No-op if the hash already exists.
+     * @param gameId - Steam game ID.
+     * @param filename - Screenshot filename.
+     * @param screenshotHash - SHA-256 hex digest of the file.
+     */
     public async add(gameId: string, filename: string, screenshotHash: string): Promise<void> {
         const hashes = await this.load();
 

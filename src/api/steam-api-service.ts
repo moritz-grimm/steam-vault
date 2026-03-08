@@ -18,6 +18,13 @@ export class SteamApiService {
         private readonly gameTitleCache: GameTitleCache,
     ) {}
 
+    /**
+     * Resolves a Steam app ID to its game title. Returns a cached value if available,
+     * otherwise fetches from the Steam Store API and caches the result.
+     * @param appId - Steam application ID (e.g. `"730"` for CS2).
+     * @returns The game title, or `undefined` if the API returns no data.
+     * @throws If the Steam API request fails.
+     */
     public async getGameTitle(appId: string): Promise<string | undefined> {
         if (await this.gameTitleCache.has(appId)) {
             this.logger.info(`${appId} found in cache`);

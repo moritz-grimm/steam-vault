@@ -46,6 +46,12 @@ export class AuthService {
         return new msal.PublicClientApplication(this.getMsalConfig());
     }
 
+    /**
+     * Authenticates with Microsoft. Uses cached tokens silently when available,
+     * otherwise falls back to the device code flow (prints a URL for the user to visit).
+     * @returns The MSAL authentication result containing the access token.
+     * @throws If the device code flow fails or is cancelled.
+     */
     public async login(): Promise<msal.AuthenticationResult> {
         const pca = this.createClient();
         const accounts = await pca.getTokenCache().getAllAccounts();
@@ -75,6 +81,7 @@ export class AuthService {
         return response;
     }
 
+    /** Removes all cached accounts and deletes the MSAL token cache file. */
     public async logout(): Promise<void> {
         const pca = this.createClient();
         const accounts = await pca.getTokenCache().getAllAccounts();
@@ -94,12 +101,17 @@ export class AuthService {
         this.logger.info("User successfully logged out.");
     }
 
+    /**
+     * Convenience method that calls {@link login} and returns just the access token string.
+     * @throws If authentication fails.
+     */
     public async getToken(): Promise<string> {
         const loginResponse = await this.login();
         if (!loginResponse) throw new Error("Could not authenticate");
         return loginResponse.accessToken;
     }
 
+    /** Returns `true` if at least one account exists in the MSAL token cache. */
     public async isLoggedIn(): Promise<boolean> {
         const pca = this.createClient();
         const accounts = await pca.getTokenCache().getAllAccounts();

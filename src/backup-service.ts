@@ -122,6 +122,11 @@ export class BackupService {
         return { successCount, failCount };
     }
 
+    /**
+     * Runs a full backup: scans screenshot folders, hashes files to skip duplicates,
+     * writes EXIF metadata, uploads new screenshots to OneDrive, and syncs the hash file.
+     * Uses concurrent uploads (max 5) with a progress bar.
+     */
     public async runFull(): Promise<void> {
         const pendingUploads = await this.collectPendingUploads();
 
@@ -146,6 +151,10 @@ export class BackupService {
         }
     }
 
+    /**
+     * Simulates a full backup without uploading. Lists which screenshots would be
+     * uploaded and the target OneDrive path.
+     */
     public async runDryRunFull(): Promise<void> {
         const pendingUploads = await this.collectPendingUploads();
 
