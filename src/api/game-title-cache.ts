@@ -47,7 +47,7 @@ export class GameTitleCache {
         const entries = await this.loadFromDisk();
         entries[appId] = gameTitle;
 
-        await writeToJsonAsync(this.config.gameTitleCache, JSON.stringify(entries, null, 2));
+        await writeToJsonAsync(this.config.gameTitleCache, entries);
         this.logger.info("Successfully wrote new game title to disk");
         this.entries = entries;
     }
