@@ -8,7 +8,7 @@
     "type": "module",
     "main": "./src/steamvault.ts",
     "bin": {
-        "steamvault": "./src/steamvault.ts"
+        "steamvault": "src/steamvault.ts"
     },
     "files": [
         "src/",
@@ -22,12 +22,13 @@
         "lint:fix": "npx eslint --fix",
         "lint:strict": "npx eslint --max-warnings=0",
         "prepare": "husky",
-        "prepublishOnly": "npm run lint:strict && npm run typecheck && npm test",
+        "prepublishOnly": "npm run lint:strict && npm run typecheck && npm run test",
         "prod": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts",
         "prod:debug": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts --debug",
         "sort-package-json": "npx sort-package-json",
-        "test": "vitest",
-        "test:coverage": "vitest --coverage",
+        "test": "vitest run",
+        "test:coverage": "vitest run --coverage",
+        "test:watch": "vitest",
         "typecheck": "npx tsc --noEmit 2>&1"
     },
     "dependencies": {

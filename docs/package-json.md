@@ -17,6 +17,14 @@
 | `lint:fix`  | Lints all files and automatically fixes any issues that can be resolved. |
 | `typecheck` | Run a Typescript typecheck                                               |
 
+## Tests
+
+| Script          | Description                               |
+| --------------- | ----------------------------------------- |
+| `test`          | Tests all scripts once without watch mode |
+| `test:watch`    | Tests all scripts with watch mode enabled |
+| `test:coverage` | Analyzes the test coverage                |
+
 ## Misc
 
 | Script              | Description                             |
