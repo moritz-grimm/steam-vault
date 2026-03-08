@@ -1,29 +1,66 @@
 {
-  "name": "steam-vault",
-  "version": "1.0.0",
-  "description": "",
-  "main": "steamvault.ts",
-  "type": "module",
-  "scripts": {
-    "debug": "npx tsx ./src/steamvault.ts",
-    "lint": "npx eslint"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@eslint/js": "^9.37.0",
-    "@stylistic/eslint-plugin": "5.4.0",
-    "axios": "^1.13.2",
-    "commander": "^14.0.2",
-    "eslint": "^9.39.1",
-    "globals": "^16.4.0",
-    "inquirer": "^12.10.0",
-    "jiti": "^2.6.1",
-    "tsx": "^4.20.6",
-    "typescript-eslint": "^8.46.1"
-  },
-  "devDependencies": {
-    "@types/node": "^24.10.0"
-  }
+    "name": "steam-vault",
+    "version": "1.0.0",
+    "description": "CLI tool to back up Steam screenshots to Microsoft OneDrive",
+    "keywords": [],
+    "license": "MIT",
+    "author": "moritz-grimm",
+    "type": "module",
+    "main": "./src/steamvault.ts",
+    "bin": {
+        "steamvault": "src/steamvault.ts"
+    },
+    "files": [
+        "src/",
+        "LICENSE",
+        "README.md"
+    ],
+    "scripts": {
+        "build": "bun build ./src/steamvault.ts --compile --outfile ./build/steamvault",
+        "dev": "npx tsx ./src/steamvault.ts --debug",
+        "lint": "npx eslint",
+        "lint:fix": "npx eslint --fix",
+        "lint:strict": "npx eslint --max-warnings=0",
+        "prepare": "husky",
+        "prepublishOnly": "npm run lint:strict && npm run typecheck && npm run test",
+        "prod": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts",
+        "prod:debug": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts --debug",
+        "sort-package-json": "npx sort-package-json",
+        "test": "vitest run",
+        "test:coverage": "vitest run --coverage",
+        "test:watch": "vitest",
+        "typecheck": "npx tsc --noEmit 2>&1"
+    },
+    "dependencies": {
+        "@azure/msal-node": "^3.8.2",
+        "@inquirer/prompts": "^7.9.0",
+        "axios": "^1.13.2",
+        "chalk": "^5.6.2",
+        "cli-progress": "^3.12.0",
+        "commander": "^14.0.2",
+        "exiftool-vendored": "^33.2.0",
+        "p-limit": "^7.3.0",
+        "tsx": "^4.20.6",
+        "update-notifier": "^7.3.1",
+        "winston": "^3.18.3",
+        "winston-daily-rotate-file": "^5.0.0"
+    },
+    "devDependencies": {
+        "@moritz-grimm/eslint-config-moritz-grimm": "^1.0.1",
+        "@types/cli-progress": "^3.11.6",
+        "@types/node": "^24.10.0",
+        "@types/update-notifier": "^6.0.8",
+        "@vitest/coverage-v8": "^4.0.18",
+        "cross-env": "^10.1.0",
+        "eslint": "^9.39.1",
+        "globals": "^16.4.0",
+        "husky": "^9.1.7",
+        "lint-staged": "^16.3.2",
+        "typescript": "^5.9.3",
+        "vite-tsconfig-paths": "^6.1.1",
+        "vitest": "^4.0.18"
+    },
+    "engines": {
+        "node": ">=20"
+    }
 }

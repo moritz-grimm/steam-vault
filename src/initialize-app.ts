@@ -1,0 +1,68 @@
+import { access, mkdir } from "node:fs/promises";
+import { resolve } from "node:path";
+import { GameTitleCache } from "src/api/game-title-cache";
+import { OneDriveService } from "src/api/onedrive-service";
+import { SteamApiService } from "src/api/steam-api-service";
+import { AppContext } from "src/app-context";
+import { AuthService } from "src/auth/ms-auth";
+import { BackupService } from "src/backup-service";
+import { parseCLIArgs } from "src/cli/cli-parser";
+import { configPath, ConfigService, SteamVaultConfig } from "src/config-service";
+import { HashService } from "src/hash-service";
+import { writeToJsonAsync } from "src/utils/json-utils";
+import { createAppLogger } from "src/utils/logger";
+import { getAppDataPath } from "src/utils/filepath-utils";
+
+const appDataFolder = resolve(getAppDataPath(), "SteamVault");
+const backupPath = resolve(appDataFolder, "backup");
+
+const defaultConfig: SteamVaultConfig = {
+    screenshotDirectory: "",
+    gameTitleCache: "%APPDATA%/SteamVault/game-title.cache.json",
+    screenshotHashes: "%APPDATA%/SteamVault/screenshot.hashes.json",
+    entraClientId: "1cb15360-f199-4b94-94de-557b82824079",
+    msalCache: "%APPDATA%/SteamVault/msal.cache.json",
+    logDirPath: "%APPDATA%/SteamVault/logs",
+    backupPath: "%APPDATA%/SteamVault/backup",
+    oneDriveRootPath: "special/photos",
+    oneDriveBaseFolder: "SteamVault",
+};
+
+/**
+ * Initializes the SteamVault application on startup.
+ *
+ * This function performs the following steps:
+ * 1. Creates the AppData folder for SteamVault if it doesn't exist yet
+ * 2. Ensures a default config file exists
+ * 3. Loads all configuration via ConfigService
+ * 4. Executes the Microsoft login flow
+ *
+ * @returns {Promise<AppContext>} The application context with config, CLI options, and logger
+ * @throws {Error} May throw errors during directory creation, config loading, or MS authentication
+ */
+export async function initializeApp(): Promise<AppContext> {
+    await mkdir(appDataFolder, { recursive: true });
+    await mkdir(backupPath, { recursive: true });
+
+    try {
+        await access(configPath);
+    } catch {
+        await writeToJsonAsync(configPath, defaultConfig);
+    }
+
+    const cliOptions = parseCLIArgs();
+    const configService = await ConfigService.create();
+    const logger = createAppLogger({ logDirPath: configService.get().logDirPath });
+    logger.info("CLI options:", cliOptions);
+    const gameTitleCache = new GameTitleCache(configService, logger);
+
+    const authService = new AuthService(configService, logger);
+    const hashService = new HashService(configService, logger);
+    const onedriveService = new OneDriveService(configService, logger, authService);
+    const steamApiService = new SteamApiService(logger, gameTitleCache);
+    const backupService = new BackupService(configService, logger, steamApiService, hashService, onedriveService);
+
+    await authService.login();
+
+    return { configService, authService, cliOptions, backupService };
+}

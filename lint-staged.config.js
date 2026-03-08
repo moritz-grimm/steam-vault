@@ -1,0 +1,9 @@
+export default {
+    "*.{ts,js}": [
+        "npm run lint:fix",
+        () => "npm run typecheck",
+    ],
+    "package.json": [
+        "npm run sort-package-json",
+    ],
+};

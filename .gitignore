@@ -1,5 +1,17 @@
+# Node
 node_modules
 build
 npm-debug.log
-.env
+**/.env
 .DS_Store
+
+# steam-vault
+todo.md
+/logs
+
+# dotenvx
+!/.env
+.env.keys
+
+# vitest
+coverage
