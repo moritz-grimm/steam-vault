@@ -3,6 +3,14 @@
     "version": "1.0.1",
     "description": "CLI tool to back up Steam screenshots to Microsoft OneDrive",
     "keywords": [],
+    "homepage": "https://github.com/moritz-grimm/steam-vault#readme",
+    "bugs": {
+        "url": "https://github.com/moritz-grimm/steam-vault/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/moritz-grimm/steam-vault.git"
+    },
     "license": "MIT",
     "author": "moritz-grimm",
     "type": "module",
