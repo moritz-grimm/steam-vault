@@ -1,6 +1,5 @@
 import * as msal from "@azure/msal-node";
-import { existsSync, unlinkSync } from "node:fs";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, unlink, writeFile } from "node:fs/promises";
 import { ConfigService, SteamVaultConfig } from "src/config-service";
 import { printInfo } from "src/utils/print";
 import { Logger } from "winston";
@@ -90,9 +89,7 @@ export class AuthService {
             await pca.getTokenCache().removeAccount(acc);
         }
 
-        if (existsSync(msalCache)) {
-            unlinkSync(msalCache);
-        }
+        await unlink(msalCache).catch(() => {});
 
         this.logger.info("User successfully logged out.");
     }
