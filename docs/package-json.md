@@ -17,13 +17,6 @@
 | `lint:fix`  | Lints all files and automatically fixes any issues that can be resolved. |
 | `typecheck` | Run a Typescript typecheck                                               |
 
-## dotenvx
-
-| Script            | Description                                                                    |
-| ----------------- | ------------------------------------------------------------------------------ |
-| `dotenvx:decrypt` | Decrypts the `.env` file at runtime. Should be used when adding new keys.      |
-| `dotenvx:encrypt` | Encrypts the `.env` file. **Only run if you know exactly what you are doing.** |
-
 ## Misc
 
 | Script              | Description                             |
