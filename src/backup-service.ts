@@ -92,7 +92,7 @@ export class BackupService {
                 const { gameId, gameTitle, filename, screenshotHash } = upload;
                 try {
                     const screenshotPath = getScreenshotPath(this.config.screenshotDirectory, gameId, filename);
-                    const screenshotBackupPath = `${this.config.backupPath}/${filename}`;
+                    const screenshotBackupPath = `${this.config.backupPath}/${gameId}-${filename}`;
 
                     this.logger.info(`Creating screenshot backup for: ${screenshotPath}`);
                     this.logger.info("Writing EXIF metadata");
@@ -130,16 +130,19 @@ export class BackupService {
             return;
         }
 
-        const result = await this.uploadScreenshots(pendingUploads);
-        await this.onedriveService.uploadHashJson();
-        await exiftool.end();
+        try {
+            const result = await this.uploadScreenshots(pendingUploads);
+            await this.onedriveService.uploadHashJson();
 
-        if (result.failCount === 0 && result.successCount > 0) {
-            printSuccess(`Backup complete: ${result.successCount} file(s) uploaded`);
-        } else if (result.failCount > 0 && result.successCount > 0) {
-            printInfo(`Backup complete: ${result.successCount} uploaded, ${result.failCount} failed`);
-        } else if (result.failCount > 0 && result.successCount === 0) {
-            printError(`Backup failed: all ${result.failCount} file(s) failed`);
+            if (result.failCount === 0 && result.successCount > 0) {
+                printSuccess(`Backup complete: ${result.successCount} file(s) uploaded`);
+            } else if (result.failCount > 0 && result.successCount > 0) {
+                printInfo(`Backup complete: ${result.successCount} uploaded, ${result.failCount} failed`);
+            } else if (result.failCount > 0 && result.successCount === 0) {
+                printError(`Backup failed: all ${result.failCount} file(s) failed`);
+            }
+        } finally {
+            await exiftool.end();
         }
     }
 
