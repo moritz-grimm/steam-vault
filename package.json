@@ -1,15 +1,20 @@
 {
     "name": "steam-vault",
     "version": "1.0.0",
-    "description": "",
+    "description": "CLI tool to back up Steam screenshots to Microsoft OneDrive",
     "keywords": [],
     "license": "MIT",
     "author": "moritz-grimm",
     "type": "module",
-    "main": "steamvault.ts",
+    "main": "./src/steamvault.ts",
     "bin": {
         "steamvault": "./src/steamvault.ts"
     },
+    "files": [
+        "src/",
+        "LICENSE",
+        "README.md"
+    ],
     "scripts": {
         "build": "bun build ./src/steamvault.ts --compile --outfile ./build/steamvault",
         "dev": "npx tsx ./src/steamvault.ts --debug",
@@ -17,6 +22,7 @@
         "lint:fix": "npx eslint --fix",
         "lint:strict": "npx eslint --max-warnings=0",
         "prepare": "husky",
+        "prepublishOnly": "npm run lint:strict && npm run typecheck && npm test",
         "prod": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts",
         "prod:debug": "cross-env NODE_ENV=production npx tsx ./src/steamvault.ts --debug",
         "sort-package-json": "npx sort-package-json",
@@ -33,6 +39,7 @@
         "commander": "^14.0.2",
         "exiftool-vendored": "^33.2.0",
         "p-limit": "^7.3.0",
+        "tsx": "^4.20.6",
         "winston": "^3.18.3",
         "winston-daily-rotate-file": "^5.0.0"
     },
@@ -46,7 +53,6 @@
         "globals": "^16.4.0",
         "husky": "^9.1.7",
         "lint-staged": "^16.3.2",
-        "tsx": "^4.20.6",
         "typescript": "^5.9.3",
         "vite-tsconfig-paths": "^6.1.1",
         "vitest": "^4.0.18"
