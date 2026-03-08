@@ -1,5 +1,5 @@
-import fs from "node:fs/promises";
-import path from "node:path";
+import { readdir } from "node:fs/promises";
+import { isAbsolute } from "node:path";
 import { getScreenshotFolder } from "src/utils/filepath-utils";
 
 /**
@@ -16,16 +16,16 @@ import { getScreenshotFolder } from "src/utils/filepath-utils";
  * console.log(folders); // ["Game1", "Game2", "Game3"]
  */
 export async function scanForScreenshotFolders(directory: string): Promise<Array<string>> {
-    if (!path.isAbsolute(directory)) {
+    if (!isAbsolute(directory)) {
         throw new Error("Path must be absolute");
     }
-    const entries = await fs.readdir(directory, { withFileTypes: true });
+    const entries = await readdir(directory, { withFileTypes: true });
     return entries.filter(entry => entry.isDirectory()).map(entry => entry.name);
 };
 
 export async function scanForScreenshots(basePath: string, gameId: string): Promise<Array<string>> {
     const directory = getScreenshotFolder(basePath, gameId);
 
-    const files = await fs.readdir(directory);
+    const files = await readdir(directory);
     return files.filter(file => /\.(png|jpg|jpeg)$/i.test(file));
 }
