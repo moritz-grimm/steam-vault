@@ -169,6 +169,10 @@ npm test
 npm run build
 ```
 
+## Disclaimer
+
+This project is not affiliated with, endorsed by, or associated with Valve Corporation or Steam. "Steam" is a trademark of Valve Corporation. All trademarks are the property of their respective owners.
+
 ## License
 
 [MIT](LICENSE)
