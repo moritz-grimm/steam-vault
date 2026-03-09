@@ -1,26 +1,30 @@
 # SteamVault
 
-Automatically backup your Steam screenshots to OneDrive.
+If you take a lot of Steam screenshots, they're probably just sitting on your PC with no backup. One bad drive and they're gone.
+
+SteamVault is a small CLI tool that automatically backs them up to OneDrive (more providers coming soon). Screenshots are sorted by game, duplicates are removed, and everything shows up nicely organized in your Photos library.
+
+![Demo Gif](assets/demo.gif)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-green.svg)](https://nodejs.org/)
 
 ## Features
 
-- **Automatic screenshot detection** - finds your Steam screenshot directory via the Windows registry
-- **Deduplication** - SHA-256 hashing prevents duplicate uploads
-- **EXIF metadata injection** - writes `DateTimeOriginal` so photos sort correctly in OneDrive
-- **Concurrent uploads** - uploads up to 5 screenshots in parallel with a progress bar
-- **Game title resolution** - organizes screenshots into folders named after the game (via the Steam Store API)
-- **Game title caching** - caches API lookups to disk so subsequent runs are faster
-- **Dry-run mode** - preview what would be uploaded without making any changes
+- **Automatically organizes** screenshots into folders by game name
+- **Skips duplicates** won't upload the same screenshot twice
+- Screenshots show up **correctly sorted** in OneDrive Photos
+- **Auto-detects** your Steam library on Windows
+- **Dry-run mode** to preview before uploading
+- **Fast**, uploads up to 5 files in parallel
 
 ## Prerequisites
 
 - **Windows** (requires `%APPDATA%` and the Windows registry for Steam path detection)
-- **Node.js** ≥ 20
-- **Steam** installed with at least one screenshot taken
 - **Microsoft account** with OneDrive access
+- **Node.js ≥ 20** – required for the npm version (includes auto-update notifications).  
+    **Alternatively**: download the standalone `.exe`, no Node.js required, but no auto-updates.
+- **Steam** installed with at least one screenshot taken
 
 ## Installation
 
