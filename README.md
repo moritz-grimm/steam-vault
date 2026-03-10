@@ -134,6 +134,18 @@ inside your Steam `userdata` directory (e.g. `C:/Program Files (x86)/Steam/userd
 
 - SteamVault requires the `%APPDATA%` environment variable. This is set by default on Windows. If missing, set it manually or run from a standard Windows terminal.
 
+**"Unknown Game (appId)" folders**
+
+- Some Steam games get removed, split, or re-released over time (e.g. GTA V => Legacy Edition + Enhanced Edition). When that happens, the Steam Store API no longer returns a title for the original app ID.
+- Your screenshots are still backed up normally, they just end up in a folder called `Unknown Game (12345)` instead of the actual game name.
+- This is purely cosmetic. You can rename the folder in OneDrive at any time.
+
+**Windows SmartScreen warning when running the .exe**
+
+- Windows may flag the standalone `.exe` as potentially dangerous because it is not code-signed. This is a false positive.
+- Click **"More info"** => **"Run anyway"** to proceed.
+- Alternatively, install via `npm install -g steam-vault` to avoid this entirely.
+
 **Upload failures**
 
 - Uploads are retried up to 3 times automatically.
