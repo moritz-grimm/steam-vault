@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- Crash when backing up screenshots from removed or split Steam games (e.g. GTA 5, app ID 218)
+- Application hanging during EXIF metadata writing when processing multiple files simultaneously
+- Screenshots being re-uploaded on every run due to hash mismatch after EXIF modification
+- Log messages appearing in the compiled executable (SteamVault.exe) output
+
+## 1.0.1 - 2026-03-08
+
+### Changed
+
+- Add tsup build step for npm publishing
+- Add custom icon for executable
+
+### Removed
+
+- Remove daily log rotation from README feature list
+
 ## 1.0.0 - 2026-03-08
 
 ### Added
@@ -24,14 +44,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI for linting, type checking, and tests
 - Vitest test suite
 - Husky pre-commit hooks (lint + typecheck via lint-staged)
-
-## 1.0.1 - 2026-03-08
-
-### Changed
-
-- Add tsup build step for npm publishing
-- Add custom icon for executable
-
-### Removed
-
-- Remove daily log rotation from README feature list

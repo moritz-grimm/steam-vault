@@ -33,16 +33,14 @@ export class SteamApiService {
 
         try {
             const res = await axios.get<SteamApiResponse>(`http://store.steampowered.com/api/appdetails/?appids=${appId}`);
-            let gameTitle;
             this.logger.info(`${appId} not found in cache. Getting title from api`);
-            if (res.data[appId]?.success) {
-                gameTitle = res.data[appId].data.name;
+
+            if (!res.data[appId]?.success) {
+                this.logger.warn(`App ID ${appId} not found on Steam (removed or archived)`);
+                return undefined;
             }
 
-            if (!gameTitle) {
-                throw new Error(`No data found for appId: ${appId}`);
-            }
-
+            const gameTitle = res.data[appId].data.name;
             await this.gameTitleCache.set(appId, gameTitle);
             return gameTitle;
         } catch (err: unknown) {
