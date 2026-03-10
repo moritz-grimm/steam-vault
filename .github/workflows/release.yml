@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+
+  build-exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: bun build ./src/steamvault.ts --compile --outfile ./build/steamvault --windows-icon=assets/steamvault.ico
+      - name: Generate SHA-256 checksum
+        run: |
+          $hash = (Get-FileHash -Path ./build/steamvault.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  steamvault.exe" | Out-File -Encoding ascii ./build/steamvault.exe.sha256
+        shell: pwsh
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/steamvault.exe
+            build/steamvault.exe.sha256

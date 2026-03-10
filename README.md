@@ -1,26 +1,30 @@
 # SteamVault
 
-Automatically backup your Steam screenshots to OneDrive.
+If you take a lot of Steam screenshots, they're probably just sitting on your PC with no backup. One bad drive and they're gone.
+
+SteamVault is a small CLI tool that automatically backs them up to OneDrive (more providers coming soon). Screenshots are sorted by game, duplicates are removed, and everything shows up nicely organized in your Photos library.
+
+![Demo Gif](assets/demo.gif)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-green.svg)](https://nodejs.org/)
 
 ## Features
 
-- **Automatic screenshot detection** - finds your Steam screenshot directory via the Windows registry
-- **Deduplication** - SHA-256 hashing prevents duplicate uploads
-- **EXIF metadata injection** - writes `DateTimeOriginal` so photos sort correctly in OneDrive
-- **Concurrent uploads** - uploads up to 5 screenshots in parallel with a progress bar
-- **Game title resolution** - organizes screenshots into folders named after the game (via the Steam Store API)
-- **Game title caching** - caches API lookups to disk so subsequent runs are faster
-- **Dry-run mode** - preview what would be uploaded without making any changes
+- **Automatically organizes** screenshots into folders by game name
+- **Skips duplicates** won't upload the same screenshot twice
+- Screenshots show up **correctly sorted** in OneDrive Photos
+- **Auto-detects** your Steam library on Windows
+- **Dry-run mode** to preview before uploading
+- **Fast**, uploads up to 5 files in parallel
 
 ## Prerequisites
 
 - **Windows** (requires `%APPDATA%` and the Windows registry for Steam path detection)
-- **Node.js** ≥ 20
-- **Steam** installed with at least one screenshot taken
 - **Microsoft account** with OneDrive access
+- **Node.js ≥ 20** – required for the npm version (includes auto-update notifications).  
+    **Alternatively**: download the standalone `.exe`, no Node.js required, but no auto-updates.
+- **Steam** installed with at least one screenshot taken
 
 ## Installation
 
@@ -130,6 +134,18 @@ inside your Steam `userdata` directory (e.g. `C:/Program Files (x86)/Steam/userd
 
 - SteamVault requires the `%APPDATA%` environment variable. This is set by default on Windows. If missing, set it manually or run from a standard Windows terminal.
 
+**"Unknown Game (appId)" folders**
+
+- Some Steam games get removed, split, or re-released over time (e.g. GTA V => Legacy Edition + Enhanced Edition). When that happens, the Steam Store API no longer returns a title for the original app ID.
+- Your screenshots are still backed up normally, they just end up in a folder called `Unknown Game (12345)` instead of the actual game name.
+- This is purely cosmetic. You can rename the folder in OneDrive at any time.
+
+**Windows SmartScreen warning when running the .exe**
+
+- Windows may flag the standalone `.exe` as potentially dangerous because it is not code-signed. This is a false positive.
+- Click **"More info"** => **"Run anyway"** to proceed.
+- Alternatively, install via `npm install -g steam-vault` to avoid this entirely.
+
 **Upload failures**
 
 - Uploads are retried up to 3 times automatically.
@@ -168,6 +184,10 @@ npm test
 # Build standalone executable (requires Bun)
 npm run build
 ```
+
+## Disclaimer
+
+This project is not affiliated with, endorsed by, or associated with Valve Corporation or Steam. "Steam" is a trademark of Valve Corporation. All trademarks are the property of their respective owners.
 
 ## License
 

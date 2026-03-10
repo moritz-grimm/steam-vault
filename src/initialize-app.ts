@@ -52,7 +52,7 @@ export async function initializeApp(): Promise<AppContext> {
 
     const cliOptions = parseCLIArgs();
     const configService = await ConfigService.create();
-    const logger = createAppLogger({ logDirPath: configService.get().logDirPath });
+    const logger = createAppLogger({ logDirPath: configService.get().logDirPath, enableConsole: cliOptions.debug });
     logger.info("CLI options:", cliOptions);
     const gameTitleCache = new GameTitleCache(configService, logger);
 
