@@ -24,7 +24,7 @@
         "README.md"
     ],
     "scripts": {
-        "build:bun": "bun build ./src/steamvault.ts --compile --outfile ./build/steamvault --windows-icon=assets/steamvault.ico",
+        "build:bun": "bun build ./src/steamvault.ts --compile --outfile ./build/steamvault --windows-icon=assets/steamvault.ico --windows-title=SteamVault --windows-description=SteamVault",
         "build:npm": "tsup",
         "dev": "npx tsx ./src/steamvault.ts --debug",
         "lint": "npx eslint",
@@ -43,12 +43,13 @@
     "dependencies": {
         "@azure/msal-node": "^3.8.2",
         "@inquirer/prompts": "^7.9.0",
+        "@types/piexifjs": "^1.0.0",
         "axios": "^1.13.2",
         "chalk": "^5.6.2",
         "cli-progress": "^3.12.0",
         "commander": "^14.0.2",
-        "exiftool-vendored": "^33.2.0",
         "p-limit": "^7.3.0",
+        "piexifjs": "^1.0.6",
         "update-notifier": "^7.3.1",
         "winston": "^3.18.3",
         "winston-daily-rotate-file": "^5.0.0"
