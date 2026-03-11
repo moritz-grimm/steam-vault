@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 1.0.3 - 2026-03-11
+
 ### Fixed
 
 - Fixed SteamVault standalone executable freezing on EXIF operation
