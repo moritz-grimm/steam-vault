@@ -1,5 +1,4 @@
 import { Presets, SingleBar } from "cli-progress";
-import { exiftool } from "exiftool-vendored";
 import pLimit from "p-limit";
 import { OneDriveService } from "src/api/onedrive-service";
 import { SteamApiService } from "src/api/steam-api-service";
@@ -80,7 +79,6 @@ export class BackupService {
 
     private async uploadScreenshots(pendingUploads: PendingUpload[]): Promise<{ successCount: number; failCount: number }> {
         const limit = pLimit(5);
-        const exifLimit = pLimit(1);
         const progressBar = new SingleBar({}, Presets.shades_classic);
         progressBar.start(pendingUploads.length, 0);
         let successCount = 0;
@@ -96,7 +94,7 @@ export class BackupService {
 
                     this.logger.info(`Creating screenshot backup for: ${screenshotPath}`);
                     this.logger.info("Writing EXIF metadata");
-                    await exifLimit(() => writeExifMetadata(screenshotPath, screenshotBackupPath));
+                    await writeExifMetadata(screenshotPath, screenshotBackupPath);
                     this.logger.info("EXIF metadata written successfully");
 
                     const postExifHash = await this.hashService.hashScreenshot(gameId, filename);
@@ -136,19 +134,15 @@ export class BackupService {
             return;
         }
 
-        try {
-            const result = await this.uploadScreenshots(pendingUploads);
-            await this.onedriveService.uploadHashJson();
+        const result = await this.uploadScreenshots(pendingUploads);
+        await this.onedriveService.uploadHashJson();
 
-            if (result.failCount === 0 && result.successCount > 0) {
-                printSuccess(`Backup complete: ${result.successCount} file(s) uploaded`);
-            } else if (result.failCount > 0 && result.successCount > 0) {
-                printInfo(`Backup complete: ${result.successCount} uploaded, ${result.failCount} failed`);
-            } else if (result.failCount > 0 && result.successCount === 0) {
-                printError(`Backup failed: all ${result.failCount} file(s) failed`);
-            }
-        } finally {
-            await exiftool.end();
+        if (result.failCount === 0 && result.successCount > 0) {
+            printSuccess(`Backup complete: ${result.successCount} file(s) uploaded`);
+        } else if (result.failCount > 0 && result.successCount > 0) {
+            printInfo(`Backup complete: ${result.successCount} uploaded, ${result.failCount} failed`);
+        } else if (result.failCount > 0 && result.successCount === 0) {
+            printError(`Backup failed: all ${result.failCount} file(s) failed`);
         }
     }
 
